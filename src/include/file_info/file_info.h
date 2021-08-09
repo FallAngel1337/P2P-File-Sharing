@@ -20,7 +20,7 @@
 
 // Need to be a REGULAR FILE
 struct file_info {
-    char *file_name;
+    const char *file_name;
     size_t file_size; // in bytes
 
     unsigned char checksum[32]; // sha256
