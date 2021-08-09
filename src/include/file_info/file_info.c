@@ -19,8 +19,8 @@ static inline int is_regular_file(mode_t mode)
 
 static void file_checksum(struct file_info *_file_info)
 {
-    unsigned char *data;
-    asprintf(&data, "%d%s", _file_info->file_size, _file_info->file_name);
+    char *data;
+    asprintf(&data, "%ld%s", _file_info->file_size, _file_info->file_name);
     SHA256(data, SHA256_DIGEST_LENGTH, _file_info->checksum);
     free(data);
 }
