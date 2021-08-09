@@ -20,7 +20,7 @@ char *jsonSerialize(struct file_info *_file_info)
 
     file_name = cJSON_CreateString(_file_info->file_name);
     file_size = cJSON_CreateNumber(_file_info->file_size);
-    checksum = cJSON_CreateRaw(_file_info->checksum);
+    checksum = cJSON_CreateString(_file_info->checksum);
 
     cJSON_AddItemToObject(file, "file_name", file_name);
     cJSON_AddItemToObject(file, "file_size", file_size);
@@ -45,7 +45,7 @@ struct file_info* jsonDeserialize(const char *json, struct file_info *_file_info
     file_name = cJSON_GetObjectItemCaseSensitive(file, "file_name");
     if (cJSON_IsString(file_name) && (file_name->valuestring != NULL))
     {
-        strcpy((char*)_file_info->file_name, file_name->valuestring);
+        _file_info->file_name = strdup(file_name->valuestring);
     }
 
     file_size = cJSON_GetObjectItemCaseSensitive(file, "file_size");
@@ -55,13 +55,12 @@ struct file_info* jsonDeserialize(const char *json, struct file_info *_file_info
     }
 
     checksum = cJSON_GetObjectItemCaseSensitive(file, "checksum");
-    if (cJSON_IsRaw(checksum))
+    if (cJSON_IsString(checksum) && (checksum->valuestring != NULL))
     {
-       for (int i=0; i < 32; i++) {
-           _file_info->checksum[i] = checksum->valuestring[i];
-       }
+        strncpy(_file_info->checksum, checksum->valuestring, 64);
     }
 
+    cJSON_Delete(file);
     return _file_info;
 }
 
