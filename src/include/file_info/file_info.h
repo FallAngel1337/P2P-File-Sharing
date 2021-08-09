@@ -18,4 +18,7 @@
 
 struct file_info;
 
-#endif /* _FILE_INFO */
+int file_info_init(struct file_info *_file_info);
+int file_info_load(const char *__restrict__ _filename, struct file_info *_file_info);
+
+#endif /* _FILE_INFO_H */
