@@ -1,18 +1,29 @@
+#define _GNU_SOURCE
+
 #include "file_info.h"
 
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <openssl/sha.h>
 
-struct file_info {
-    char *file_name;
-    char *file_type;
-    size_t file_size; // in bytes
+static inline int is_regular_file(mode_t mode)
+{
+    mode &= S_IFMT;
+    if (mode != S_IFREG) return 0;
+    return -1;
+}
 
-    unsigned char *checksum; // sha256
-};
+static void file_checksum(struct file_info *_file_info)
+{
+    unsigned char *data;
+    asprintf(&data, "%d%s", _file_info->file_size, _file_info->file_name);
+    SHA256(data, SHA256_DIGEST_LENGTH, _file_info->checksum);
+    free(data);
+}
 
 int file_info_init(struct file_info *_file_info)
 {
@@ -20,7 +31,6 @@ int file_info_init(struct file_info *_file_info)
 
     *_file_info = (struct file_info) {
         .file_name = NULL,
-        .file_type = NULL,
         .file_size = 0,
         .checksum = NULL,
     };
@@ -30,5 +40,37 @@ int file_info_init(struct file_info *_file_info)
 
 int file_info_load(const char *__restrict__ _filename, struct file_info *_file_info)
 {
-    return 0;
+    if (!_filename || !_file_info) {
+        fprintf(stderr, "Can't use null values as parameters!\n");
+        return -1;
+    }
+
+    struct stat st;
+    int fd;
+    char *type;
+
+    if ((fd = open(_filename, O_RDONLY)) < 0) {
+        fprintf(stderr, "Could not read the file %s\n", _filename);
+        return -1;
+    }
+
+    if (fstat(fd, &st) < 0) {
+        fprintf(stderr, "Could not load %s stats\n", _filename);
+        return -1;
+    }
+
+    if (!is_regular_file(st.st_mode)) {
+        fprintf(stderr, "This file isn't a regular file!\n");
+        close(fd);
+        return -1;
+    }
+
+    *_file_info = (struct file_info) {
+        .file_name = _filename,
+        .file_size = st.st_size,
+    };
+
+    file_checksum(_file_info);
+
+    close(fd);
 }
