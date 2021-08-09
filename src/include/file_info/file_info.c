@@ -21,7 +21,11 @@ static void file_checksum(struct file_info *_file_info, unsigned char *_content)
 {
     char *data;
     asprintf(&data, "%s%ld%s", _file_info->file_name,  _file_info->file_size, _content);
-    SHA256(data, SHA256_DIGEST_LENGTH, _file_info->checksum);
+    SHA256(data, SHA256_DIGEST_LENGTH, _file_info->hash);
+    for (int i=0; i < 32; i++) {
+        sprintf(_file_info->checksum + (i*2), "%02x", _file_info->hash[i]);
+    }
+
     free(data);
 }
 
@@ -34,6 +38,7 @@ int file_info_init(struct file_info *_file_info)
         .file_size = 0,
     };
 
+    memset(_file_info->hash, 0, SHA256_DIGEST_LENGTH);
     memset(_file_info->checksum, 0, SHA256_DIGEST_LENGTH);
 
     return 0;
@@ -72,10 +77,8 @@ int file_info_load(const char *__restrict__ _filename, struct file_info *_file_i
         return -1;
     }
 
-    *_file_info = (struct file_info) {
-        .file_name = _filename,
-        .file_size = st.st_size,
-    };
+    _file_info->file_name = _filename,
+    _file_info->file_size = st.st_size,
 
     file_checksum(_file_info, content);
 
