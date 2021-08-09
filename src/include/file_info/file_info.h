@@ -16,7 +16,15 @@
 #ifndef _FILE_INFO_H
 #define _FILE_INFO_H
 
-struct file_info;
+#include <sys/types.h>
+
+// Need to be a REGULAR FILE
+struct file_info {
+    char *file_name;
+    size_t file_size; // in bytes
+
+    unsigned char checksum[32]; // sha256
+};
 
 int file_info_init(struct file_info *_file_info);
 int file_info_load(const char *__restrict__ _filename, struct file_info *_file_info);
