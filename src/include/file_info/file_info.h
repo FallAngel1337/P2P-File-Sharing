@@ -1,7 +1,7 @@
 /**
  * file_info.h - Describe a file
  * Author: FallAngel
- * Date: 09/08/2021
+ * Date: 2021-08-09
  * 
  * Copyright © 2021
 */
