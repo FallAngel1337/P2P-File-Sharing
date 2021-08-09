@@ -31,7 +31,17 @@ char *jsonSerialize(struct file_info *_file_info)
     return json;
 }
 
-struct file_info* jsonDeserialize(const char *json)
+struct file_info* jsonDeserialize(const char *json, struct file_info *_file_info)
+{
+    return NULL;
+}
+
+int jsonWriteFile(const char *_json, struct file_info *_file_info, char **_file_name)
+{
+    return 0;
+}
+
+char* jsonReadFile(const char *_file_name)
 {
     return NULL;
 }
