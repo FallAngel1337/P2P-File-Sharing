@@ -11,3 +11,13 @@ struct file_info {
 
     unsigned char *checksum;
 };
+
+int file_info_init(struct file_info *_file_info)
+{
+    return 0;
+}
+
+int file_info_load(const char *__restrict__ _filename, struct file_info *_file_info)
+{
+    return 0;
+}
