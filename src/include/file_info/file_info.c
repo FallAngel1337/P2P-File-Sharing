@@ -17,10 +17,10 @@ static inline int is_regular_file(mode_t mode)
     return -1;
 }
 
-static void file_checksum(struct file_info *_file_info)
+static void file_checksum(struct file_info *_file_info, unsigned char *_content)
 {
     char *data;
-    asprintf(&data, "%ld%s", _file_info->file_size, _file_info->file_name);
+    asprintf(&data, "%s%ld%s", _file_info->file_name,  _file_info->file_size, _content);
     SHA256(data, SHA256_DIGEST_LENGTH, _file_info->checksum);
     free(data);
 }
@@ -49,6 +49,7 @@ int file_info_load(const char *__restrict__ _filename, struct file_info *_file_i
     struct stat st;
     int fd;
     char *type;
+    unsigned char content[512];
 
     if ((fd = open(_filename, O_RDONLY)) < 0) {
         fprintf(stderr, "Could not read the file %s\n", _filename);
@@ -57,6 +58,11 @@ int file_info_load(const char *__restrict__ _filename, struct file_info *_file_i
 
     if (fstat(fd, &st) < 0) {
         fprintf(stderr, "Could not load %s stats\n", _filename);
+        return -1;
+    }
+
+    if (read(fd, content, 1024) < 0) {
+        fprintf(stderr, "Could not read %s contents\n", _filename);
         return -1;
     }
 
@@ -71,7 +77,7 @@ int file_info_load(const char *__restrict__ _filename, struct file_info *_file_i
         .file_size = st.st_size,
     };
 
-    file_checksum(_file_info);
+    file_checksum(_file_info, content);
 
     close(fd);
 }
