@@ -32,8 +32,9 @@ int file_info_init(struct file_info *_file_info)
     *_file_info = (struct file_info) {
         .file_name = NULL,
         .file_size = 0,
-        .checksum = NULL,
     };
+
+    memset(_file_info->checksum, 0, SHA256_DIGEST_LENGTH);
 
     return 0;
 }
