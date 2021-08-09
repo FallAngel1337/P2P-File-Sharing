@@ -33,7 +33,36 @@ char *jsonSerialize(struct file_info *_file_info)
 
 struct file_info* jsonDeserialize(const char *json, struct file_info *_file_info)
 {
-    return NULL;
+    cJSON *file = cJSON_Parse(json);
+    if (!file) {
+        return NULL;
+    }
+
+    cJSON *file_name = NULL;
+    cJSON *file_size = NULL;
+    cJSON *checksum = NULL;
+
+    file_name = cJSON_GetObjectItemCaseSensitive(file, "file_name");
+    if (cJSON_IsString(file_name) && (file_name->valuestring != NULL))
+    {
+        strcpy(_file_info->file_name, file_name->valuestring);
+    }
+
+    file_size = cJSON_GetObjectItemCaseSensitive(file, "file_size");
+    if (cJSON_IsNumber(file_size))
+    {
+        _file_info->file_size = file_size->valueint;
+    }
+
+    checksum = cJSON_GetObjectItemCaseSensitive(file, "checksum");
+    if (cJSON_IsRaw(checksum))
+    {
+       for (int i=0; i < 32; i++) {
+           _file_info->checksum[i] = checksum->valuestring[i];
+       }
+    }
+
+    return _file_info;
 }
 
 int jsonWriteFile(const char *_json, struct file_info *_file_info, char **_file_name)
