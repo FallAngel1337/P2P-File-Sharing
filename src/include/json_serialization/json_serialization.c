@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
 
 char *jsonSerialize(struct file_info *_file_info)
 {
@@ -64,9 +67,38 @@ struct file_info* jsonDeserialize(const char *json, struct file_info *_file_info
     return _file_info;
 }
 
+static char* change_file_extension(char *_file_name, char *_new_ext)
+{
+    char *__file_name = strdup(_file_name);
+    strtok(__file_name, ".");
+    strcat(__file_name, ".torrent");
+
+    return __file_name;
+}
+
 int jsonWriteFile(const char *_json, struct file_info *_file_info, char **_file_name)
 {
-    return 0;
+    int fd, ret = 0;
+    char *_new_filename;
+
+    _new_filename = change_file_extension(_file_info->file_name, ".torrent");
+    if ((fd = open(_new_filename, O_RDWR|O_CREAT|O_EXCL, S_IRUSR|S_IWUSR|S_IROTH)) < 0)
+    {
+        fprintf(stderr, "Could not open/create the %s file (%s)\n", _new_filename, strerror(errno));
+        ret = -1;
+        goto end;
+    }
+
+    if (write(fd, _json, strlen(_json)) < 0)
+    {
+        fprintf(stderr, "Could not write to the %s file (%s)\n", _new_filename, strerror(errno));
+        ret = -1;
+        goto end;
+    }
+
+end:
+    free(_new_filename);
+    return ret;
 }
 
 char* jsonReadFile(const char *_file_name)
