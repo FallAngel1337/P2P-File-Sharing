@@ -36,6 +36,6 @@ int jsonWriteFile(char **_file_name, struct file_info *_file_info);
  *  and fill the `_file_info` structure. Return NULL on error
  *  and a pointer to the JSON content.
  */
-char* jsonReadFile(const char *_file_name, struct file_info *_file_info)
+char* jsonReadFile(const char *_file_name, struct file_info *_file_info);
 
 #endif /* _JSON_SERIALIZATION */
