@@ -81,7 +81,7 @@ int jsonWriteFile(char **_file_name, struct file_info *_file_info)
 {
     int fd, ret = 0;
     char *_new_filename;
-    const char *_json = jsonSerialize(_file_name);
+    const char *_json = jsonSerialize(_file_info);
 
     _new_filename = change_file_extension(_file_info->file_name, ".torrent");
     if (_file_name) *_file_name = _new_filename;
@@ -105,7 +105,7 @@ int jsonWriteFile(char **_file_name, struct file_info *_file_info)
         close(fd);
         return -1;
     }
-    
+
     close(fd);
     return 0;
 }
