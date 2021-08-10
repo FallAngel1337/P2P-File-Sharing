@@ -3,10 +3,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <libgen.h>
 
 void TestFileInfoLoad(CuTest *tc)
 {
+    printf("Testing File Info ...\n");
     struct file_info fileinfo;
     const char *sample_file = "../sample_file.txt";
     // expected

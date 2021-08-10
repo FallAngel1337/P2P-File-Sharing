@@ -6,7 +6,8 @@ set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED True)
 
 add_subdirectory(file_info)
+add_subdirectory(json_serialization)
 
 add_executable(UnitTests AllTests.c)
 
-target_link_libraries(UnitTests PUBLIC file_info_test -lcrypto)
+target_link_libraries(UnitTests PUBLIC file_info_test json_serialization_test -lcrypto -lcjson)
