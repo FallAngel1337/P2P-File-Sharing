@@ -26,11 +26,16 @@ char* jsonSerialize(struct file_info *_file_info);
 struct file_info* jsonDeserialize(const char *json, struct file_info *_file_info);
 
 /**
- * `jsonWriteFile` write into `_file_name` a malloc'd string the name of the original file
- * described onto  `_file_info`. If `_file_name` is NULL it will simple not write
- * the string into it.
+ * `jsonWriteFile` load the `_file_info` structure into a JSON file.
+ * And write the new filename into `_file_name` a malloc'd string.
 */
 int jsonWriteFile(char **_file_name, struct file_info *_file_info);
+
+/**
+ * `jsonReadFile` read a JSON file indicated by `_file_name`
+ *  and fill the `_file_info` structure. Return NULL on error
+ *  and a pointer to the JSON content.
+ */
 char* jsonReadFile(const char *_file_name, struct file_info *_file_info)
 
 #endif /* _JSON_SERIALIZATION */
