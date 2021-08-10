@@ -80,7 +80,7 @@ int file_info_load(const char *__restrict__ _filename, struct file_info *_file_i
         return -1;
     }
 
-    _file_info->file_name = basename(_filename);
+    _file_info->file_name = basename((char*)_filename);
     _file_info->file_size = st.st_size,
 
     file_checksum(_file_info, content);
