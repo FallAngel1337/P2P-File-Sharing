@@ -93,6 +93,7 @@ int jsonWriteFile(char **_file_name, struct file_info *_file_info)
             free(_new_filename);
             *_file_name = NULL;
         }
+        close(fd);
         return -1;
     }
 
@@ -101,9 +102,11 @@ int jsonWriteFile(char **_file_name, struct file_info *_file_info)
         fprintf(stderr, "Could not write to the %s file (%s)\n", _new_filename, strerror(errno));
         free(_new_filename);
         *_file_name = NULL;
+        close(fd);
         return -1;
     }
     
+    close(fd);
     return 0;
 }
 
@@ -122,24 +125,28 @@ char* jsonReadFile(const char *_file_name, struct file_info *_file_info)
     if (fstat(fd, &st) < 0)
     {
         fprintf(stderr, "Could not load %s file stats (%s)\n", _file_name, strerror(errno));
+        close(fd);
         return NULL;
     }
 
     if (!(buf = malloc(st.st_size)))
     {
         fprintf(stderr, "malloc error (%s)\n", strerror(errno));
+        close(fd);
         return NULL;
     }
 
     if (read(fd, buf, st.st_size) < 0)
     {
         fprintf(stderr, "Could not read %s file (%s)\n", _file_name, strerror(errno));
+        close(fd);
         return NULL;
     }
 
     if(!jsonDeserialize(buf, _file_info))
     {
         fprintf(stderr, "Was not possible to deserialize %s (%s)\n", _file_name, strerror(errno));
+        close(fd);
         return NULL;
     }
 
