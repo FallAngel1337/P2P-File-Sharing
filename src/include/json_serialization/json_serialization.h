@@ -30,7 +30,7 @@ struct file_info* jsonDeserialize(const char *json, struct file_info *_file_info
  * described onto  `_file_info`. If `_file_name` is NULL it will simple not write
  * the string into it.
 */
-int jsonWriteFile(const char *_json, struct file_info *_file_info, char **_file_name);
-char* jsonReadFile(const char *_file_name);
+int jsonWriteFile(char **_file_name, struct file_info *_file_info);
+char* jsonReadFile(const char *_file_name, struct file_info *_file_info)
 
 #endif /* _JSON_SERIALIZATION */

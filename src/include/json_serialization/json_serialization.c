@@ -77,10 +77,11 @@ static char* change_file_extension(const char *_file_name, const char *__restric
     return __file_name;
 }
 
-int jsonWriteFile(const char *_json, struct file_info *_file_info, char **_file_name)
+int jsonWriteFile(char **_file_name, struct file_info *_file_info)
 {
     int fd, ret = 0;
     char *_new_filename;
+    const char *_json = jsonSerialize(_file_name);
 
     _new_filename = change_file_extension(_file_info->file_name, ".torrent");
     if (_file_name) *_file_name = _new_filename;
@@ -106,7 +107,7 @@ int jsonWriteFile(const char *_json, struct file_info *_file_info, char **_file_
     return 0;
 }
 
-char* jsonReadFile(const char *_file_name)
+char* jsonReadFile(const char *_file_name, struct file_info *_file_info)
 {
     struct stat st;
     int fd;
@@ -133,6 +134,12 @@ char* jsonReadFile(const char *_file_name)
     if (read(fd, buf, st.st_size) < 0)
     {
         fprintf(stderr, "Could not read %s file (%s)\n", _file_name, strerror(errno));
+        return NULL;
+    }
+
+    if(!jsonDeserialize(buf, _file_info))
+    {
+        fprintf(stderr, "Was not possible to deserialize %s (%s)\n", _file_name, strerror(errno));
         return NULL;
     }
 
