@@ -7,6 +7,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/stat.h>
 #include <errno.h>
 
 char *jsonSerialize(struct file_info *_file_info)
@@ -67,11 +68,11 @@ struct file_info* jsonDeserialize(const char *json, struct file_info *_file_info
     return _file_info;
 }
 
-static char* change_file_extension(char *_file_name, char *_new_ext)
+static char* change_file_extension(const char *_file_name, const char *__restrict__ _new_ext)
 {
     char *__file_name = strdup(_file_name);
     strtok(__file_name, ".");
-    strcat(__file_name, ".torrent");
+    strcat(__file_name, _new_ext);
 
     return __file_name;
 }
@@ -82,26 +83,58 @@ int jsonWriteFile(const char *_json, struct file_info *_file_info, char **_file_
     char *_new_filename;
 
     _new_filename = change_file_extension(_file_info->file_name, ".torrent");
+    if (_file_name) *_file_name = _new_filename;
+
     if ((fd = open(_new_filename, O_RDWR|O_CREAT|O_EXCL, S_IRUSR|S_IWUSR|S_IROTH)) < 0)
     {
-        fprintf(stderr, "Could not open/create the %s file (%s)\n", _new_filename, strerror(errno));
-        ret = -1;
-        goto end;
+        if (errno != EEXIST) {
+            fprintf(stderr, "Could not open/create the %s file (%s)\n", _new_filename, strerror(errno));
+            free(_new_filename);
+            *_file_name = NULL;
+        }
+        return -1;
     }
 
     if (write(fd, _json, strlen(_json)) < 0)
     {
         fprintf(stderr, "Could not write to the %s file (%s)\n", _new_filename, strerror(errno));
-        ret = -1;
-        goto end;
+        free(_new_filename);
+        *_file_name = NULL;
+        return -1;
     }
-
-end:
-    free(_new_filename);
-    return ret;
+    
+    return 0;
 }
 
 char* jsonReadFile(const char *_file_name)
 {
-    return NULL;
+    struct stat st;
+    int fd;
+    char *buf;
+
+    if ((fd = open(_file_name, O_RDONLY)) < 0)
+    {   
+        fprintf(stderr, "Could not open the %s file (%s)\n", _file_name, strerror(errno));
+        return NULL;
+    }
+
+    if (fstat(fd, &st) < 0)
+    {
+        fprintf(stderr, "Could not load %s file stats (%s)\n", _file_name, strerror(errno));
+        return NULL;
+    }
+
+    if (!(buf = malloc(st.st_size)))
+    {
+        fprintf(stderr, "malloc error (%s)\n", strerror(errno));
+        return NULL;
+    }
+
+    if (read(fd, buf, st.st_size) < 0)
+    {
+        fprintf(stderr, "Could not read %s file (%s)\n", _file_name, strerror(errno));
+        return NULL;
+    }
+
+    return buf;
 }
