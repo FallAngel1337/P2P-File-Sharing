@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <openssl/sha.h>
+#include <libgen.h>
 
 static inline int is_regular_file(mode_t mode)
 {
@@ -54,7 +55,7 @@ int file_info_load(const char *__restrict__ _filename, struct file_info *_file_i
     struct stat st;
     int fd;
     char *type;
-    unsigned char content[512];
+    unsigned char *content;
 
     if ((fd = open(_filename, O_RDONLY)) < 0) {
         fprintf(stderr, "Could not read the file %s\n", _filename);
@@ -66,7 +67,9 @@ int file_info_load(const char *__restrict__ _filename, struct file_info *_file_i
         return -1;
     }
 
-    if (read(fd, content, 1024) < 0) {
+    content = malloc(st.st_size);
+
+    if (read(fd, content, st.st_size) < 0) {
         fprintf(stderr, "Could not read %s contents\n", _filename);
         return -1;
     }
@@ -77,10 +80,13 @@ int file_info_load(const char *__restrict__ _filename, struct file_info *_file_i
         return -1;
     }
 
-    _file_info->file_name = _filename,
+    _file_info->file_name = basename(_filename);
     _file_info->file_size = st.st_size,
 
     file_checksum(_file_info, content);
-
+    
+    free(content);
     close(fd);
+    
+    return  0;
 }
