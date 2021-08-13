@@ -150,5 +150,6 @@ char* jsonReadFile(const char *_file_name, struct file_info *_file_info)
         return NULL;
     }
 
+    close(fd);
     return buf;
 }
