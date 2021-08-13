@@ -54,7 +54,7 @@ int main(int argc, char **argv)
     const char *CSERVER_IP;
     unsigned CSERVER_PORT;
 
-    const char *filename = argv[1];
+    char *filename = argv[1];
 
     config_init(&conf);
 
@@ -64,7 +64,6 @@ int main(int argc, char **argv)
         return -1;
     }
 
-
     config_lookup_string(&conf, "CLIENT_IP", &CLIENT_IP);
     config_lookup_int(&conf, "CLIENT_PORT", &CLIENT_PORT);
     config_lookup_string(&conf, "CLIENT_LOG_DIR", &CLIENT_LOG_DIR);
@@ -72,12 +71,39 @@ int main(int argc, char **argv)
     config_lookup_string(&conf, "CSERVER_IP", &CSERVER_IP);
     config_lookup_int(&conf, "CSERVER_PORT", &CSERVER_PORT);
 
-    if (is_a_torrent(filename)) {
-        printf("It's a torrent!");
-    } else {
-        printf("It's not a torrent!");
-    }
+    struct file_info fileinfo;
+    file_info_init(&fileinfo);
 
+    if (is_a_torrent(filename)) {
+        char *json = NULL;
+        if (!(json = jsonReadFile(filename, &fileinfo))) {
+            fprintf(stderr, "Could not load the json content of the file %s\n", filename);
+            config_destroy(&conf);
+            return -1;
+        }
+
+        printf("Filename: %s\n", fileinfo.file_name);
+        printf("File size: %zu\n", fileinfo.file_size);
+        printf("Checksum: %s\n", fileinfo.checksum);
+
+        printf("%s\n", json);
+
+        free(json);       
+    } else {
+        if (file_info_load(filename, &fileinfo) < 0) {
+            fprintf(stderr, "Could not load the file %s\n", filename);
+            config_destroy(&conf);
+            return -1;
+        }
+
+        if (jsonWriteFile(&filename, &fileinfo) < 0) {
+            fprintf(stderr, "Could not create the torrent\n");
+            config_destroy(&conf);
+            return -1;
+        }
+        printf("Created %s successfully!\n", filename);
+        free(filename);
+    }
 
     config_destroy(&conf);
     return 0;
