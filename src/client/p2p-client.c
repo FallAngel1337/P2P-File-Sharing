@@ -9,6 +9,7 @@
 /**
  * Will interact with the server,
  * create and download the "torrents".
+ * Also serve the file for downloading.
 */
 
 #include "../include/file_info/file_info.h"
@@ -17,6 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 static char* get_file_ext(const char *__restrict__ _filename)
 {
@@ -24,6 +26,12 @@ static char* get_file_ext(const char *__restrict__ _filename)
     strtok(__filename, ".");
     __filename = strtok(NULL, ".");
     return __filename;
+}
+
+static inline bool isa_torrent(const char *_filename)
+{
+    char *_ext = get_file_ext(_filename);
+    return (strcmp(_ext, "torrent")) ? false : true;
 }
 
 int main(int argc, char **argv)
@@ -37,8 +45,9 @@ int main(int argc, char **argv)
     char *torrent_file;
     file_info_init(&fileinfo);
 
-    if (!strcmp(get_file_ext(argv[1]), "torrent"))
+    if (isa_torrent(argv[1]))
     {
+        /* Request server ... */
         jsonReadFile(argv[1], &fileinfo);
         printf("Filename: %s\n", fileinfo.file_name);
         printf("File size: %zu\n", fileinfo.file_size);
