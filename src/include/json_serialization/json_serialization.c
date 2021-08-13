@@ -129,7 +129,7 @@ char* jsonReadFile(const char *_file_name, struct file_info *_file_info)
         return NULL;
     }
 
-    if (!(buf = malloc(st.st_size)))
+    if (!(buf = calloc(1, st.st_size)))
     {
         fprintf(stderr, "malloc error (%s)\n", strerror(errno));
         close(fd);
