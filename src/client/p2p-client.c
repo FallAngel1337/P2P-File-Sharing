@@ -71,32 +71,32 @@ int main(int argc, char **argv)
     config_lookup_string(&conf, "CSERVER_IP", &CSERVER_IP);
     config_lookup_int(&conf, "CSERVER_PORT", &CSERVER_PORT);
 
-    struct file_info fileinfo;
-    file_info_init(&fileinfo);
+    struct Node *node = node_create(CLIENT_IP, CLIENT_PORT);
+    struct file_info *fileinfo = node->fileinfo;
 
     if (is_a_torrent(filename)) {
         char *json = NULL;
-        if (!(json = jsonReadFile(filename, &fileinfo))) {
+        if (!(json = jsonReadFile(filename, fileinfo))) {
             fprintf(stderr, "Could not load the json content of the file %s\n", filename);
             config_destroy(&conf);
             return -1;
         }
 
-        printf("Filename: %s\n", fileinfo.file_name);
-        printf("File size: %zu\n", fileinfo.file_size);
-        printf("Checksum: %s\n", fileinfo.checksum);
+        printf("Filename: %s\n", fileinfo->file_name);
+        printf("File size: %zu\n", fileinfo->file_size);
+        printf("Checksum: %s\n", fileinfo->checksum);
 
         printf("%s\n", json);
 
         free(json);       
     } else {
-        if (file_info_load(filename, &fileinfo) < 0) {
+        if (file_info_load(filename, fileinfo) < 0) {
             fprintf(stderr, "Could not load the file %s\n", filename);
             config_destroy(&conf);
             return -1;
         }
 
-        if (jsonWriteFile(&filename, &fileinfo) < 0) {
+        if (jsonWriteFile(&filename, fileinfo) < 0) {
             fprintf(stderr, "Could not create the torrent\n");
             config_destroy(&conf);
             return -1;
@@ -106,5 +106,6 @@ int main(int argc, char **argv)
     }
 
     config_destroy(&conf);
+    node_destroy(node);
     return 0;
 }

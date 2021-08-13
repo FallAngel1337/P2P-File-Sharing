@@ -23,7 +23,7 @@ struct Node {
     struct sockaddr_in addr;
 };
 
-struct Node* node_create(void);
+struct Node* node_create(const char *__restrict__ ip, uint32_t port);
 int node_destroy(struct Node *node);
 
 #endif /* _NODE_H */
