@@ -20,9 +20,14 @@ Choose from where you want and follow the instructions to install the program.
 Before installing make sure you have installed the following dependencie(s):
 - cJSON
     - [From source](https://github.com/DaveGamble/cJSON#building)
-    - Using `apt` on debian-based distros 
+    - Using `apt` on debian-based distros:
     
         `$ sudo apt update && sudo apt install libcjson-dev`
+- libconfig
+    - You can check it at their [website](https://hyperrealm.github.io/libconfig/) or at [github](https://hyperrealm.github.io/libconfig/)
+    - Using `apt` on debian-based distros:
+
+        `$ sudo apt update && sudo apt install libconfig-dev`
 
 ### Install from source:
 ```
