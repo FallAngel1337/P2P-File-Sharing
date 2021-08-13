@@ -10,8 +10,8 @@
  * And some other related functions.
 */
 
-#ifndef _NODE_H_
-#define _NODE_H_
+#ifndef _NODE_H
+#define _NODE_H
 
 #include "../file_info/file_info.h"
 
@@ -24,6 +24,6 @@ struct Node {
 };
 
 struct Node* node_create(void);
-int node_destroy(struct Node*);
+int node_destroy(struct Node *node);
 
-#endif /* _NODE_H_ */
+#endif /* _NODE_H */
