@@ -13,7 +13,7 @@
 */
 
 // Global headers
-#include "../include/file_info/file_info.h"
+#include "../include/node/node.h"
 #include "../include/json_serialization/json_serialization.h"
 
 // Client headers
