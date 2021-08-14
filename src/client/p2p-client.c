@@ -36,7 +36,7 @@ static char* get_file_ext(const char *__restrict__ _filename)
 static inline bool is_a_torrent(const char *_filename)
 {
     char *_ext = get_file_ext(_filename);
-    return (strcmp(_ext, "torrent")) ? false : true;
+    return (!_ext || strcmp(_ext, "torrent")) ? false : true;
 }
 
 int main(int argc, char **argv)
