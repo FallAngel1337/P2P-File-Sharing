@@ -5,6 +5,7 @@ project(P2P-Client VERSION 0.1)
 add_subdirectory(../include/node node)
 add_subdirectory(../include/file_info file_info)
 add_subdirectory(../include/json_serialization json_serialization)
+add_subdirectory(include/net)
 
 add_executable(P2P-Client p2p-client.c)
 
@@ -12,5 +13,6 @@ target_link_libraries(P2P-Client PUBLIC
                       file_info 
                       json_serialization
                       node
+                      connection
                       -lcrypto -lcjson -lconfig
 )

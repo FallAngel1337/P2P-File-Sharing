@@ -18,6 +18,7 @@
 
 // Client headers
 #include "include/config/config.h"
+#include "include/net/connection.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -82,11 +83,7 @@ int main(int argc, char **argv)
             return -1;
         }
 
-        printf("Filename: %s\n", fileinfo->file_name);
-        printf("File size: %zu\n", fileinfo->file_size);
-        printf("Checksum: %s\n", fileinfo->checksum);
-
-        printf("%s\n", json);
+        connecttos(CSERVER_IP, CSERVER_PORT, json, strlen(json)+1);
 
         free(json);       
     } else {
