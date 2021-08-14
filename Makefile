@@ -25,7 +25,7 @@ else
 	@ echo "\033[32m[+]\033[0m Done!"
 	
 	@ echo "\033[1;33m[!]\033[0m Copying the configuration files to $(CONF_DIR) ..."
-	@ cp conf/client.conf $(CONF_DIR)
+	@ cp conf/*.conf $(CONF_DIR)
 	@ echo "\033[32m[+]\033[0m Done!"
 endif
 
