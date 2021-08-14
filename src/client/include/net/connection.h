@@ -24,8 +24,7 @@ int connecttos(const char *__restrict__ ip, uint32_t port,
 
 // Store the response from the server in
 // `n` bytes of `buf`. 
-int recvfroms(const char *__restrict__ ip, uint32_t port,
-              const void *__restrict__ _buf, size_t _n);
+int recvfroms(int _fd, void *__restrict__ _buf, size_t _n);
 
 // Connect to another client and send `n` bytes of `buf`.
 int connecttoc(struct sockaddr_in *addr, const void *__restrict__ _buf, size_t _n);
