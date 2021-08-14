@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 project(P2P-Client VERSION 0.1)
 
 add_subdirectory(../include/node node)
+add_subdirectory(../include/logging logs)
 add_subdirectory(../include/file_info file_info)
 add_subdirectory(../include/json_serialization json_serialization)
 add_subdirectory(include/net)
@@ -14,5 +15,6 @@ target_link_libraries(P2P-Client PUBLIC
                       json_serialization
                       node
                       connection
+                      logs
                       -lcrypto -lcjson -lconfig
 )
