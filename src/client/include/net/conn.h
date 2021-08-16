@@ -1,5 +1,5 @@
 /**
- * connection.h - Client connection header
+ * conn.h - Client connection handle header
  * Author: FallAngel
  * Date: 2021-08-14
  * 
