@@ -31,14 +31,16 @@ static inline uint64_t get_hash(unsigned char *_hash)
 
 int table_insert(struct rtable *_table, struct Node *node, size_t _size)
 {   
+    if (!_table || !node || _size <= 0) return -1;
+
     uint64_t hash = get_hash(node->fileinfo->hash);
-    struct Node *node = _table[mulhashing(hash, _size)].node;
+    struct Node *_node = _table[mulhashing(hash, _size)].node;
     
 #ifdef _DEBUG
         printf("hash=%lu\n", hash);
 #endif
 
-    if (!node) {
+    if (!_node) {
 
 #ifdef _DEBUG
         printf("table[%lu] is free ...\n", mulhashing(hash, _size));
@@ -54,13 +56,15 @@ int table_insert(struct rtable *_table, struct Node *node, size_t _size)
         _table[mulhashing(hash, _size)].next = _table;
 
     }
+
+    return 0;
 }
 
 int table_remove(struct rtable *_table, struct Node *node, size_t _size)
 {
     uint64_t hash = get_hash(node->fileinfo->hash);
     if (_table[mulhashing(hash, _size)].next) {
-        fprintf(stderr, "This entry(%d) is chained ... can not delete it due possible miss deletion!\n", mulhashing(hash, _size));
+        fprintf(stderr, "This entry(%lu) is chained ... can not delete it due possible miss deletion!\n", mulhashing(hash, _size));
         return -1;
     } else {
         node_destroy(_table[mulhashing(hash, _size)].node);

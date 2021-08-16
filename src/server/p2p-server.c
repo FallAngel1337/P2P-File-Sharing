@@ -58,7 +58,7 @@ int main(int argc, char **argv)
     memset(&addr, 0, len);
 
     addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = htonls(inet_addr(CSERVER_IP));
+    addr.sin_addr.s_addr = htonl(inet_addr(CSERVER_IP));
     addr.sin_port = htons(CSERVER_PORT);
 
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
