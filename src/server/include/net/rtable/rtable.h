@@ -11,6 +11,7 @@
 
 #include "../../../../include/file_info/file_info.h"
 #include "../../../../include/json_serialization/json_serialization.h"
+#include "hash.h"
 
 #define TABLE_MAX 10
 
@@ -18,5 +19,7 @@ struct rtable {
     struct file_info *_file_info;
     struct rtable *next;
 };
+
+void show_table(struct rtable *_table);
 
 #endif /* _RTABLE_H */
