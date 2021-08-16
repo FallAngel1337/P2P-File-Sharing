@@ -9,15 +9,17 @@
 #ifndef _RTABLE_H
 #define _RTABLE_H
 
-#include "../../../../include/file_info/file_info.h"
+#include "../../../../include/node/node.h"
 #include "../../../../include/json_serialization/json_serialization.h"
 #include "hash.h"
 
 struct rtable {
-    struct file_info *_file_info;
+    struct Node *node;
     struct rtable *next;
 };
 
 void show_table(struct rtable *_table);
+int table_insert(struct rtable *_table, struct Node *node);
+int table_remove(struct rtable *_table, struct Node *node);
 
 #endif /* _RTABLE_H */
