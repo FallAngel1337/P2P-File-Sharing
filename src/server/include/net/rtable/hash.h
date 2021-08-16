@@ -6,11 +6,16 @@
  * Copyright (c) 2021
  */
 
+#ifndef _RTABLE_H
+#error "Do not use hash.h directly; include the rtable.h file instead."
+#endif
+
 #ifndef _HASH_TABLE_H
 #define _HASH_TABLE_H
 
 #include <stdint.h>
 #include <math.h>
+#include <sys/ioctl.h>
 
 #define A 0.1415F
 
