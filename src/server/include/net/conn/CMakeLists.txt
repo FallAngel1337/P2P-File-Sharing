@@ -3,3 +3,5 @@ add_library(
     conn.c
     conn.h
 )
+
+target_link_libraries(connection json_serialization)

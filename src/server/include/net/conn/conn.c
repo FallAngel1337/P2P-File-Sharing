@@ -1,5 +1,3 @@
-#define _DEBUG
-
 #include "../../../../include/json_serialization/json_serialization.h"
 #include "conn.h"
 

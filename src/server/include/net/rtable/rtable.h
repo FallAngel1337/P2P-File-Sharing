@@ -13,8 +13,6 @@
 #include "../../../../include/json_serialization/json_serialization.h"
 #include "hash.h"
 
-#define TABLE_MAX 10
-
 struct rtable {
     struct file_info *_file_info;
     struct rtable *next;
