@@ -9,7 +9,7 @@
 #ifndef _CONNECTION_H
 #define _CONNECTION_H
 
-#include "../../../../include/file_info/file_info.h"
+#include "../../../../include/node/node.h"
 
 #include <sys/types.h>
 #include <stdint.h>
