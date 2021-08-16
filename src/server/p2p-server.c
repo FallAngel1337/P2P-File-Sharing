@@ -52,14 +52,13 @@ int main(int argc, char **argv)
 
     struct rtable table[RTABLE_SIZE];
     struct sockaddr_in addr;
-    struct file_info fileinfo;
     socklen_t len = sizeof(addr);
     int sock;
 
-    memset(&addr, 0, sizeof(addr));
+    memset(&addr, 0, len);
 
     addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = inet_addr(CSERVER_IP);
+    addr.sin_addr.s_addr = htonls(inet_addr(CSERVER_IP));
     addr.sin_port = htons(CSERVER_PORT);
 
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -68,7 +67,7 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    if (bind(sock, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
+    if (bind(sock, (struct sockaddr*)&addr, len) < 0) {
         fprintf(stderr, "bind error: %s\n", strerror(errno));
         config_destroy(&conf);
         close(sock);
@@ -84,15 +83,18 @@ int main(int argc, char **argv)
 
     printf("Running at %s:%d\n", CSERVER_IP, CSERVER_PORT);
     while (1) {
-        int connfd = accept(sock, (struct sockaddr*)&addr, &len);
-        if (recvfromc(connfd, &fileinfo) < 0) {
+        struct sockaddr_in client_addr;
+        int connfd = accept(sock, (struct sockaddr*)&client_addr, &len);
+
+        struct Node *node = node_create(inet_ntoa(client_addr.sin_addr), client_addr.sin_port);
+        if (recvfromc(connfd, node->fileinfo) < 0) {
             fprintf(stderr, "recvfromc failed\n");
             close(connfd);
             break;
         }
 
         printf("Filename: %s\nFile size: %zu\nChecksum: %s\n",
-            fileinfo.file_name, fileinfo.file_size, fileinfo.checksum);
+            node->fileinfo->file_name, node->fileinfo->file_size, node->fileinfo->checksum);
     }
 
     config_destroy(&conf);
