@@ -1,5 +1,5 @@
 add_library(
     connection
-    connection.c
-    connection.h
+    conn.c
+    conn.h
 )

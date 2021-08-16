@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(P2P-Client VERSION 0.1)
 
-add_subdirectory(include/net)
+add_subdirectory(include/net/conn)
 
 add_subdirectory(../include/node node)
 add_subdirectory(../include/file_info file_info)
