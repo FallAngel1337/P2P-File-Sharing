@@ -22,7 +22,7 @@ struct Node* node_create(const char *__restrict__ ip, uint32_t port)
 
     addr = (struct sockaddr_in) {
         .sin_family = AF_INET,
-        .sin_addr.s_addr = htonl(inet_addr(ip)),
+        .sin_addr.s_addr = inet_addr(ip),
         .sin_port = (port) ? htons(port) : htons(use_random_port()),
     };
 

@@ -56,9 +56,11 @@ int main(int argc, char **argv)
     int sock;
 
     memset(&addr, 0, len);
+    table_init(table, RTABLE_SIZE);
+
 
     addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = htonl(inet_addr(CSERVER_IP));
+    addr.sin_addr.s_addr = inet_addr(CSERVER_IP);
     addr.sin_port = htons(CSERVER_PORT);
 
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -90,8 +92,12 @@ int main(int argc, char **argv)
         if (recvfromc(connfd, node->fileinfo) < 0) {
             fprintf(stderr, "recvfromc failed\n");
             close(connfd);
+            node_destroy(node);
             break;
         }
+
+        table_insert(table, node, RTABLE_SIZE);
+        printf("Added!\n");
 
         printf("Filename: %s\nFile size: %zu\nChecksum: %s\n",
             node->fileinfo->file_name, node->fileinfo->file_size, node->fileinfo->checksum);
