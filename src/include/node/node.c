@@ -16,7 +16,7 @@ static inline uint32_t use_random_port()
 struct Node* node_create(const char *__restrict__ ip, uint32_t port)
 {
     struct Node *node = malloc(sizeof(struct Node));
-    struct file_info *fileinfo = malloc(sizeof(struct file_info));
+    struct file_info *fileinfo = calloc(1, sizeof(struct file_info));
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(addr));
 
