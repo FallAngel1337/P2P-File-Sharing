@@ -60,5 +60,5 @@ For now, you need to build both separately.
     $ cd build
     $ cmake ..
     $ make
-    $ ./P2P-Sverer--help
+    $ ./P2P-Server --help
     ```
