@@ -18,7 +18,7 @@
 
 // Client headers
 #include "include/config/config.h"
-#include "include/net/connection.h"
+#include "include/net/conn.h"
 
 #include <stdio.h>
 #include <stdlib.h>

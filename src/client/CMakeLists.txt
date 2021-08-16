@@ -2,10 +2,11 @@ cmake_minimum_required(VERSION 3.16)
 
 project(P2P-Client VERSION 0.1)
 
+add_subdirectory(include/net)
+
 add_subdirectory(../include/node node)
 add_subdirectory(../include/file_info file_info)
 add_subdirectory(../include/json_serialization json_serialization)
-add_subdirectory(include/net)
 
 add_executable(P2P-Client p2p-client.c)
 

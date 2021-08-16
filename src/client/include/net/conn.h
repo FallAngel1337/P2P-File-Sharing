@@ -19,7 +19,7 @@
 #include <netinet/in.h>
 
 // Connect to the server and send `n` bytes of `buf`.
-int connecttos(const char *__restrict__ ip, uint32_t port, 
+int connecttos(const char *__restrict__ ip, uint32_t port,
                const void *__restrict__ _buf, size_t _n);
 
 // Store the response from the server in
