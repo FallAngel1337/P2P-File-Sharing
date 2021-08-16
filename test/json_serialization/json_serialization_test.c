@@ -42,7 +42,7 @@ void TestJsonDeserialization(CuTest *tc)
     free(free_later);
 }
 
-CuSuite* GetJsonSerializationGetSuite()
+CuSuite* JsonSerializationSuite()
 {
     CuSuite *suite = CuSuiteNew();
     SUITE_ADD_TEST(suite, TestJsonSerialization);
