@@ -19,7 +19,8 @@ struct rtable {
 };
 
 void show_table(struct rtable *_table);
-int table_insert(struct rtable *_table, struct Node *node);
-int table_remove(struct rtable *_table, struct Node *node);
+int table_init(struct rtable *_table, size_t _size);
+int table_insert(struct rtable *_table, struct Node *node, size_t _size);
+int table_remove(struct rtable *_table, struct Node *node, size_t _size);
 
 #endif /* _RTABLE_H */
