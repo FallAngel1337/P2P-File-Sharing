@@ -20,22 +20,24 @@
 #ifndef _JSON_SERIALIZATION
 #define _JSON_SERIALIZATION
 
-#include "../file_info/file_info.h"
+#include "../node.h"
 
-char* jsonSerialize(struct file_info *_file_info);
-struct file_info* jsonDeserialize(const char *json, struct file_info *_file_info);
+// Node serialization functions
+char* nodeSerialize(struct Node *_node);
+struct Node* nodeDeserialize(const char *json, struct Node *_node);
+
 
 /**
- * `jsonWriteFile` load the `_file_info` structure into a JSON file.
+ * `jsonWriteFile` load the `_node` structure into a JSON file.
  * And write the new filename into `_file_name` a malloc'd string.
 */
-int jsonWriteFile(char **_file_name, struct file_info *_file_info);
+int jsonWriteFile(char **_file_name, struct Node *_node);
 
 /**
  * `jsonReadFile` read a JSON file indicated by `_file_name`
- *  and fill the `_file_info` structure. Return NULL on error
+ *  and fill the `_node` structure. Return NULL on error
  *  and a pointer to the JSON content.
  */
-char* jsonReadFile(const char *_file_name, struct file_info *_file_info);
+char* jsonReadFile(const char *_file_name, struct Node *__node);
 
 #endif /* _JSON_SERIALIZATION */

@@ -1,4 +1,5 @@
 #include "node_serr.h"
+#include "../file_info/file_info.h"
 
 #include <cjson/cJSON.h>
 
@@ -10,62 +11,33 @@
 #include <sys/stat.h>
 #include <errno.h>
 
-char *jsonSerialize(struct file_info *_file_info)
+/**
+ * 
 {
-    cJSON *file = cJSON_CreateObject();
-    if (!file) {
-        return NULL;
-    }
+    "name": "Torrent File Share Network",
+    "version": "0.1",
+    "node_data": [
+        {
+            "file_name": "blah.txt",
+            "file_size": 123,
+            "checksum": "blahblahblah"
+        },
+        {
+            "IP": "0.0.0.0",
+            "PORT": 7622
+        }
+    ]
+}
+ */
 
-    cJSON *file_name = NULL;
-    cJSON *file_size = NULL;
-    cJSON *checksum = NULL;
-    char *json = NULL;
-
-    file_name = cJSON_CreateString(_file_info->file_name);
-    file_size = cJSON_CreateNumber(_file_info->file_size);
-    checksum = cJSON_CreateString(_file_info->checksum);
-
-    cJSON_AddItemToObject(file, "file_name", file_name);
-    cJSON_AddItemToObject(file, "file_size", file_size);
-    cJSON_AddItemToObject(file, "checksum", checksum);
-    
-    json = cJSON_Print(file);
-    cJSON_Delete(file);
-    return json;
+char* nodeSerialize(struct Node *_node)
+{
+    return NULL;
 }
 
-struct file_info* jsonDeserialize(const char *json, struct file_info *_file_info)
+struct Node* nodeDeserialize(const char *json, struct Node *_node)
 {
-    cJSON *file = cJSON_Parse(json);
-    if (!file) {
-        return NULL;
-    }
-
-    cJSON *file_name = NULL;
-    cJSON *file_size = NULL;
-    cJSON *checksum = NULL;
-
-    file_name = cJSON_GetObjectItemCaseSensitive(file, "file_name");
-    if (cJSON_IsString(file_name) && (file_name->valuestring != NULL))
-    {
-        _file_info->file_name = strdup(file_name->valuestring);
-    }
-
-    file_size = cJSON_GetObjectItemCaseSensitive(file, "file_size");
-    if (cJSON_IsNumber(file_size))
-    {
-        _file_info->file_size = file_size->valueint;
-    }
-
-    checksum = cJSON_GetObjectItemCaseSensitive(file, "checksum");
-    if (cJSON_IsString(checksum) && (checksum->valuestring != NULL))
-    {
-        strncpy(_file_info->checksum, checksum->valuestring, 64);
-    }
-
-    cJSON_Delete(file);
-    return _file_info;
+    return NULL;
 }
 
 static char* change_file_extension(const char *_file_name, const char *__restrict__ _new_ext)
@@ -77,11 +49,11 @@ static char* change_file_extension(const char *_file_name, const char *__restric
     return __file_name;
 }
 
-int jsonWriteFile(char **_file_name, struct file_info *_file_info)
+int jsonWriteFile(char **_file_name, struct Node *_node)
 {
     int fd, ret = 0;
     char *_new_filename;
-    const char *_json = jsonSerialize(_file_info);
+    const char *_json = fileSerialize(_file_info);
 
     _new_filename = change_file_extension(_file_info->file_name, ".torrent");
     if (_file_name) *_file_name = _new_filename;
@@ -110,7 +82,7 @@ int jsonWriteFile(char **_file_name, struct file_info *_file_info)
     return 0;
 }
 
-char* jsonReadFile(const char *_file_name, struct file_info *_file_info)
+char* jsonReadFile(const char *_file_name, struct file_info *_node)
 {
     struct stat st;
     int fd;
