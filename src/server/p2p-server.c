@@ -90,7 +90,7 @@ int main(int argc, char **argv)
         int connfd = accept(sock, (struct sockaddr*)&client_addr, &len);
 
         struct Node *node = node_create(inet_ntoa(client_addr.sin_addr), client_addr.sin_port);
-        if (recvfromc(connfd, node->fileinfo) < 0) {
+        if (recvfromc(connfd, node) < 0) {
             fprintf(stderr, "recvfromc failed\n");
             close(connfd);
             node_destroy(node);
