@@ -1,8 +1,14 @@
 #include "rtable.h"
+#include "hash.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+struct rtable {
+    struct Node *node;
+    struct rtable *next;
+};
 
 void show_table(struct rtable *_table)
 {

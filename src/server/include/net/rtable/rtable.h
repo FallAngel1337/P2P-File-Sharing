@@ -11,12 +11,8 @@
 
 #include "../../../../include/node/node.h"
 #include "../../../../include/node/serr/node_serr.h"
-#include "hash.h"
 
-struct rtable {
-    struct Node *node;
-    struct rtable *next;
-};
+struct rtable;
 
 void show_table(struct rtable *_table);
 int table_init(struct rtable *_table, size_t _size);
