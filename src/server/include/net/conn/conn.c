@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 #include "../../../../include/node/serr/node_serr.h"
+=======
+#include "../../../../include/json_serialization/json_serialization.h"
+>>>>>>> 81fa5e591ab789f1faa3545294c00cf167fae340
 #include "conn.h"
 
 #include <stdio.h>
