@@ -1,5 +1,3 @@
-#define _DEBUG
-
 #include "rtable.h"
 
 #include <stdio.h>
@@ -33,7 +31,8 @@ int table_insert(struct rtable *_table, struct Node *node, size_t _size)
 {   
     if (!_table || !node || _size <= 0) return -1;
 
-    uint64_t hash = get_hash(node->fileinfo->hash);
+    uint64_t hash = get_hash(node->fileinfo->checksum);
+    printf(">> %lu\n", hash);
     struct Node *_node = _table[mulhashing(hash, _size)].node;
     
 #ifdef _DEBUG
@@ -62,7 +61,7 @@ int table_insert(struct rtable *_table, struct Node *node, size_t _size)
 
 int table_remove(struct rtable *_table, struct Node *node, size_t _size)
 {
-    uint64_t hash = get_hash(node->fileinfo->hash);
+    uint64_t hash = get_hash(node->fileinfo->checksum);
     if (_table[mulhashing(hash, _size)].next) {
         fprintf(stderr, "This entry(%lu) is chained ... can not delete it due possible miss deletion!\n", mulhashing(hash, _size));
         return -1;
