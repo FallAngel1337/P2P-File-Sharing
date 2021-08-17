@@ -77,10 +77,12 @@ char* nodeSerialize(struct Node *_node)
     addr = cJSON_CreateObject();
     if (!addr) goto end;
 
+    printf(">> %s\n", inet_ntoa(_node->addr.sin_addr));
+
     ip = cJSON_CreateString(inet_ntoa(_node->addr.sin_addr));
     port = cJSON_CreateNumber(_node->addr.sin_port);
 
-    cJSON_AddItemToObject(addr, "IP", addr);
+    cJSON_AddItemToObject(addr, "IP", ip);
     cJSON_AddItemToObject(addr, "PORT", port);
 
     cJSON_AddItemToArray(node_data, addr);
