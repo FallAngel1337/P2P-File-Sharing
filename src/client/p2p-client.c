@@ -14,7 +14,7 @@
 
 // Global headers
 #include "../include/node/node.h"
-#include "../include/json_serialization/json_serialization.h"
+#include "../include/node/serr/node_serr.h"
 
 // Client headers
 #include "include/config/config.h"
@@ -73,11 +73,10 @@ int main(int argc, char **argv)
     config_lookup_int(&conf, "CSERVER_PORT", &CSERVER_PORT);
 
     struct Node *node = node_create(CLIENT_IP, CLIENT_PORT);
-    struct file_info *fileinfo = node->fileinfo;
 
     if (is_a_torrent(filename)) {
         char *json = NULL;
-        if (!(json = jsonReadFile(filename, fileinfo))) {
+        if (!(json = jsonReadFile(filename, node))) {
             fprintf(stderr, "Could not load the json content of the file %s\n", filename);
             config_destroy(&conf);
             return -1;
@@ -87,13 +86,13 @@ int main(int argc, char **argv)
 
         free(json);       
     } else {
-        if (file_info_load(filename, fileinfo) < 0) {
+        if (file_info_load(filename, node->fileinfo) < 0) {
             fprintf(stderr, "Could not load the file %s\n", filename);
             config_destroy(&conf);
             return -1;
         }
 
-        if (jsonWriteFile(&filename, fileinfo) < 0) {
+        if (jsonWriteFile(&filename, node) < 0) {
             fprintf(stderr, "Could not create the torrent\n");
             config_destroy(&conf);
             return -1;

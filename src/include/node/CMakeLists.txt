@@ -4,4 +4,6 @@ add_library(
     node.h
 )
 
-target_link_libraries(node file_info)
+add_subdirectory(serr/)
+
+target_link_libraries(node file_info node_serr)

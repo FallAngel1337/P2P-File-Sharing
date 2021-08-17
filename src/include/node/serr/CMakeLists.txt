@@ -1,7 +1,7 @@
 add_library(
-    json_serialization
-    json_serialization.c
-    json_serialization.h
+    node_serr
+    node_serr.c
+    node_serr.h
 )
 
-target_link_libraries(json_serialization -lcjson)
+target_link_libraries(node_serr -lcjson)

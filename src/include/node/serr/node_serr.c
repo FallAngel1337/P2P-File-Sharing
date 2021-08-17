@@ -1,5 +1,5 @@
 #include "node_serr.h"
-#include "../file_info/file_info.h"
+#include "../../file_info/file_info.h"
 
 #include <cjson/cJSON.h>
 
@@ -11,11 +11,12 @@
 #include <sys/stat.h>
 #include <errno.h>
 
+#include <arpa/inet.h> // inet_ntoa
+
 /**
  * 
 {
-    "name": "Torrent File Share Network",
-    "version": "0.1",
+    "version": "p2p-torrent-file-share 0.1",
     "node_data": [
         {
             "file_name": "blah.txt",
@@ -32,7 +33,64 @@
 
 char* nodeSerialize(struct Node *_node)
 {
-    return NULL;
+    char *json = NULL;
+    cJSON *version = NULL;
+    cJSON *node_data = NULL;
+    
+    cJSON *file = NULL;
+    cJSON *file_name = NULL;
+    cJSON *file_size = NULL;
+    cJSON *checksum = NULL;
+
+    cJSON *addr = NULL;
+    cJSON *ip = NULL;
+    cJSON *port = NULL;
+
+    cJSON *torrent = cJSON_CreateObject();
+    if (!torrent) goto end;
+
+    version = cJSON_CreateString("p2p-torrent-file-share 0.1");
+    if (!version) goto end;
+
+    cJSON_AddItemToObject(torrent, "version", version);
+
+    node_data = cJSON_CreateArray();
+    if (!node_data) goto end;
+
+    cJSON_AddItemToObject(torrent, "node_data", node_data);
+
+    // Adding file info to the array
+    file = cJSON_CreateObject();
+    if (!file) goto end;
+
+    file_name = cJSON_CreateString(_node->fileinfo->file_name);
+    file_size = cJSON_CreateNumber(_node->fileinfo->file_size);
+    checksum = cJSON_CreateString(_node->fileinfo->checksum);
+
+    cJSON_AddItemToObject(file, "file_name", file_name);
+    cJSON_AddItemToObject(file, "file_size", file_size);
+    cJSON_AddItemToObject(file, "checksum", checksum);
+
+    cJSON_AddItemToArray(node_data, file);
+
+    // Adding node address to the array
+    addr = cJSON_CreateObject();
+    if (!addr) goto end;
+
+    ip = cJSON_CreateString(inet_ntoa(_node->addr.sin_addr));
+    port = cJSON_CreateNumber(_node->addr.sin_port);
+
+    cJSON_AddItemToObject(addr, "IP", addr);
+    cJSON_AddItemToObject(addr, "PORT", port);
+
+    cJSON_AddItemToArray(node_data, addr);
+
+    json = cJSON_Print(torrent);
+    if (!json) goto end;
+
+end:
+    cJSON_Delete(torrent);
+    return json;
 }
 
 struct Node* nodeDeserialize(const char *json, struct Node *_node)
@@ -53,9 +111,9 @@ int jsonWriteFile(char **_file_name, struct Node *_node)
 {
     int fd, ret = 0;
     char *_new_filename;
-    const char *_json = fileSerialize(_file_info);
+    const char *_json = nodeSerialize(_node);
 
-    _new_filename = change_file_extension(_file_info->file_name, ".torrent");
+    _new_filename = change_file_extension(_node->fileinfo->file_name, ".torrent");
     if (_file_name) *_file_name = _new_filename;
 
     if ((fd = open(_new_filename, O_RDWR|O_CREAT|O_EXCL, S_IRUSR|S_IWUSR|S_IROTH)) < 0)
@@ -82,7 +140,7 @@ int jsonWriteFile(char **_file_name, struct Node *_node)
     return 0;
 }
 
-char* jsonReadFile(const char *_file_name, struct file_info *_node)
+char* jsonReadFile(const char *_file_name, struct Node *_node)
 {
     struct stat st;
     int fd;
@@ -115,7 +173,7 @@ char* jsonReadFile(const char *_file_name, struct file_info *_node)
         return NULL;
     }
 
-    if(!jsonDeserialize(buf, _file_info))
+    if(!nodeDeserialize(buf, _node))
     {
         fprintf(stderr, "Was not possible to deserialize %s (%s)\n", _file_name, strerror(errno));
         close(fd);
