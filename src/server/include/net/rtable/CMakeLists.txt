@@ -4,3 +4,5 @@ add_library(
     rtable.h
     hash.h
 )
+
+target_link_libraries(rtable node)

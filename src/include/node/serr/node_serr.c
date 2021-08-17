@@ -95,6 +95,7 @@ end:
 
 struct Node* nodeDeserialize(const char *json, struct Node *_node)
 {
+    if (!_node) _node = node_create("0.0.0.0", 9999);
     cJSON *version = NULL;
     cJSON *node_data = NULL;
     cJSON *data = NULL;

@@ -51,13 +51,12 @@ int main(int argc, char **argv)
     config_lookup_int(&conf, "CSERVER_PORT", &CSERVER_PORT);
     config_lookup_int(&conf, "RTABLE_SIZE", &RTABLE_SIZE);
 
-    struct rtable table[RTABLE_SIZE];
+    struct rtable **table = table_create(RTABLE_SIZE);
     struct sockaddr_in addr;
     socklen_t len = sizeof(addr);
-    int sock;
+    int sock, i=0;
 
     memset(&addr, 0, len);
-    table_init(table, RTABLE_SIZE);
 
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = inet_addr(CSERVER_IP);
@@ -66,6 +65,13 @@ int main(int argc, char **argv)
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         fprintf(stderr, "socket error: %s\n", strerror(errno));
         config_destroy(&conf);
+        return -1;
+    }
+
+    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int)) < 0) {
+        fprintf(stderr, "setsockopt error: %s\n", strerror(errno));
+        config_destroy(&conf);
+        close(sock);
         return -1;
     }
 
@@ -84,26 +90,34 @@ int main(int argc, char **argv)
     }
 
     printf("Running at %s:%d\n", CSERVER_IP, CSERVER_PORT);
-    while (1) {
+
+    // change this logic later, dont forget
+    while (i < RTABLE_SIZE) {
         struct sockaddr_in client_addr;
         int connfd = accept(sock, (struct sockaddr*)&client_addr, &len);
+        char *buf = calloc(1, 512);
 
-        struct Node *node = node_create(inet_ntoa(client_addr.sin_addr), client_addr.sin_port);
-        if (recvfromc(connfd, node) < 0) {
-            fprintf(stderr, "recvfromc failed\n");
+        if (recv(connfd, buf, 512, 0) < 0) {
+            fprintf(stderr, "recv failed %s\n", strerror(errno));
             close(connfd);
-            node_destroy(node);
             break;
         }
 
-        table_insert(table, node, RTABLE_SIZE);
-        printf("Added!\n");
+        struct Node *node = nodeDeserialize(buf, NULL);
+        if (table_insert(table, node, RTABLE_SIZE) < 0) {
+            fprintf(stderr, "Was not possible to insert node\n");
+            break;
+        }
 
-        printf("Filename: %s\nFile size: %zu\nChecksum: %s\n",
-            node->fileinfo->file_name, node->fileinfo->file_size, node->fileinfo->checksum);
+        show_table(table, RTABLE_SIZE);
+
+        free(buf);
     }
 
+    printf("LIST IS FULL\n");
+
     config_destroy(&conf);
+    free(table);
     close(sock);
     return 0;
 }

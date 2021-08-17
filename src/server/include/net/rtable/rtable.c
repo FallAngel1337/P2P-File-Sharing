@@ -1,3 +1,5 @@
+#define _DEBUG
+
 #include "rtable.h"
 #include "hash.h"
 
@@ -5,44 +7,87 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <arpa/inet.h>
+
 struct rtable {
     struct Node *node;
     struct rtable *next;
 };
 
-void show_table(struct rtable *_table)
-{
-
-}
-
-int table_init(struct rtable *_table, size_t _size)
-{
-    if (!_table) return -1;
-
-    for (size_t i=0; i < _size; i++) {
-        _table[i].node = NULL;
-        _table[i].next = NULL;
-    }
-    return 0;
-}
+int idx = 0;
 
 static inline uint64_t get_hash(unsigned char *_hash) 
 {
     uint64_t hash = 0;
-    for (int i=0; i < 32; i++) hash |= _hash[i];
+    for (int i=0; i < 65; i++) hash += _hash[i];
     return hash;
 }
 
-int table_insert(struct rtable *_table, struct Node *node, size_t _size)
+void show_table(struct rtable **_table, size_t _size)
+{
+    size_t i;
+    for (i=0; i < _size; i++) {
+        struct rtable *curr = _table[i];
+        if (curr->node) {
+            struct Node *curr_node = curr->node;
+            printf("================ Node' %lu ================\n", i);
+            printf("Node IP: %s\n", inet_ntoa(curr_node->addr.sin_addr));
+            printf("Node PORT: %d\n", curr_node->addr.sin_port);
+            printf("Node filename: %s\n", curr_node->fileinfo->file_name);
+            printf("Node file size: %lu\n", curr_node->fileinfo->file_size);  
+            printf("Node checksum: %s\n", curr_node->fileinfo->checksum);
+            printf("===========================================\n\n");
+
+            while (curr->next) {
+                struct Node *curr_node = curr->node;
+                printf("================ Node' %lu chain ================\n", i);
+                printf("Node IP: %s\n", inet_ntoa(curr_node->addr.sin_addr));
+                printf("Node PORT: %d\n", curr_node->addr.sin_port);
+                printf("Node filename: %s\n", curr_node->fileinfo->file_name);
+                printf("Node file size: %lu\n", curr_node->fileinfo->file_size);  
+                printf("Node checksum: %s\n", curr_node->fileinfo->checksum);
+                printf("=================================================\n\n");
+                curr = curr->next;
+            }
+        }
+    }
+}
+
+struct rtable** table_create(size_t rtableSize)
+{
+    struct rtable **table = malloc(sizeof(struct rtable*) * rtableSize);
+    
+    for (size_t i=0; i < rtableSize; i++) {
+        table[i] = malloc(sizeof(struct rtable));
+        table[i]->node = NULL;
+        table[i]->next = NULL;
+    }
+
+    return table;
+}
+
+void table_destroy(struct rtable **_table, size_t rtableSize)
+{
+    for (size_t i = 0; i < rtableSize; i++) free(_table[i]);
+}
+
+static struct rtable* add_table(struct Node *node)
+{
+    struct rtable *new_table = malloc(sizeof(struct rtable));
+    new_table->node = node;
+    new_table->next = NULL;
+    return new_table;
+}
+
+int table_insert(struct rtable **_table, struct Node *node, size_t _size)
 {   
     if (!_table || !node || _size <= 0) return -1;
 
     uint64_t hash = get_hash(node->fileinfo->checksum);
-    printf(">> %lu\n", hash);
-    struct Node *_node = _table[mulhashing(hash, _size)].node;
+    struct Node *_node = _table[mulhashing(hash, _size)]->node;
     
 #ifdef _DEBUG
-        printf("hash=%lu\n", hash);
+    printf("hash=%lu\n", hash);
 #endif
 
     if (!_node) {
@@ -50,7 +95,7 @@ int table_insert(struct rtable *_table, struct Node *node, size_t _size)
 #ifdef _DEBUG
         printf("table[%lu] is free ...\n", mulhashing(hash, _size));
 #endif
-        _table[mulhashing(hash, _size)].node = node;
+        _table[mulhashing(hash, _size)]->node = node;
 
     } else {
 
@@ -58,21 +103,25 @@ int table_insert(struct rtable *_table, struct Node *node, size_t _size)
         printf("table[%lu] is not free ...\n", mulhashing(hash, _size));
         printf("chaining ...\n");
 #endif
-        _table[mulhashing(hash, _size)].next = _table;
+
+        struct rtable *curr = _table[mulhashing(hash, _size)];
+        while (curr->next) curr = curr->next;
+
+        curr->next = add_table(node);
 
     }
 
     return 0;
 }
 
-int table_remove(struct rtable *_table, struct Node *node, size_t _size)
+int table_remove(struct rtable **_table, struct Node *node, size_t _size)
 {
     uint64_t hash = get_hash(node->fileinfo->checksum);
-    if (_table[mulhashing(hash, _size)].next) {
+    if (_table[mulhashing(hash, _size)]->next) {
         fprintf(stderr, "This entry(%lu) is chained ... can not delete it due possible miss deletion!\n", mulhashing(hash, _size));
         return -1;
     } else {
-        node_destroy(_table[mulhashing(hash, _size)].node);
+        node_destroy(_table[mulhashing(hash, _size)]->node);
     }
     return 0;
 }

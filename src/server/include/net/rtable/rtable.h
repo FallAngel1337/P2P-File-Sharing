@@ -14,9 +14,12 @@
 
 struct rtable;
 
-void show_table(struct rtable *_table);
-int table_init(struct rtable *_table, size_t _size);
-int table_insert(struct rtable *_table, struct Node *node, size_t _size);
-int table_remove(struct rtable *_table, struct Node *node, size_t _size);
+void show_table(struct rtable **_table, size_t rtableSize);
+
+struct rtable** table_create(size_t rtableSize);
+void table_destroy(struct rtable **_table, size_t rtableSize);
+
+int table_insert(struct rtable **_table, struct Node *node, size_t _size);
+int table_remove(struct rtable **_table, struct Node *node, size_t _size);
 
 #endif /* _RTABLE_H */
