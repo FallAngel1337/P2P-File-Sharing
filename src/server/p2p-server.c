@@ -59,7 +59,6 @@ int main(int argc, char **argv)
     memset(&addr, 0, len);
     table_init(table, RTABLE_SIZE);
 
-
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = inet_addr(CSERVER_IP);
     addr.sin_port = htons(CSERVER_PORT);
