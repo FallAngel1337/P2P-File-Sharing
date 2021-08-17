@@ -10,7 +10,7 @@
 #define _RTABLE_H
 
 #include "../../../../include/node/node.h"
-#include "../../../../include/json_serialization/json_serialization.h"
+#include "../../../../include/node/serr/node_serr.h"
 #include "hash.h"
 
 struct rtable {

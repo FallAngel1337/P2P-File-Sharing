@@ -26,6 +26,8 @@
 #include <libconfig.h>
 #include <stdbool.h>
 
+#include <arpa/inet.h>
+
 static char* get_file_ext(const char *__restrict__ _filename)
 {
     char *__filename = strdup(_filename);

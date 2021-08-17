@@ -4,4 +4,4 @@ add_library(
     conn.h
 )
 
-target_link_libraries(connection json_serialization)
+target_link_libraries(connection node_serr)

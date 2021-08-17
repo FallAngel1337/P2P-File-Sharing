@@ -1,4 +1,4 @@
-#include "../../../../include/json_serialization/json_serialization.h"
+#include "../../../../include/node/serr/node_serr.h"
 #include "conn.h"
 
 #include <stdio.h>
@@ -11,7 +11,7 @@
 #include <arpa/inet.h>
 
 // Recieve the json from client and deserialize
-int recvfromc(int _fd, struct file_info *_file_info)
+int recvfromc(int _fd, struct Node *_node)
 {
     char *_buf = calloc(1, 512);
 
@@ -25,7 +25,7 @@ int recvfromc(int _fd, struct file_info *_file_info)
     printf("%s\n", _buf);
 #endif
 
-    if (!jsonDeserialize(_buf, _file_info)) {
+    if (!nodeDeserialize(_buf, _node)) {
         fprintf(stderr, "recvfromc failed to deserialize\n");
         close(_fd); free(_buf);
         return -1;

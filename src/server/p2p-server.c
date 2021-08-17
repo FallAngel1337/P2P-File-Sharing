@@ -12,6 +12,7 @@
 
 // Global headers
 #include "../include/node/node.h"
+#include "../include/node/serr/node_serr.h"
 
 // Server headers
 #include "include/config/config.h"
