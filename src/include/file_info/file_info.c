@@ -21,10 +21,11 @@ static inline int is_regular_file(mode_t mode)
 static void file_checksum(struct file_info *_file_info, unsigned char *_content)
 {
     char *data;
+    unsigned char hash[32];
     asprintf(&data, "%s%ld%s", _file_info->file_name,  _file_info->file_size, _content);
-    SHA256(data, SHA256_DIGEST_LENGTH, _file_info->hash);
+    SHA256(data, SHA256_DIGEST_LENGTH, hash);
     for (int i=0; i < 32; i++) {
-        sprintf(_file_info->checksum + (i*2), "%02x", _file_info->hash[i]);
+        sprintf(_file_info->checksum + (i*2), "%02x", hash[i]);
     }
 
     free(data);
@@ -39,7 +40,6 @@ int file_info_init(struct file_info *_file_info)
         .file_size = 0,
     };
 
-    memset(_file_info->hash, 0, SHA256_DIGEST_LENGTH);
     memset(_file_info->checksum, 0, SHA256_DIGEST_LENGTH*2);
 
     return 0;

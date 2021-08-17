@@ -23,8 +23,7 @@ struct file_info {
     const char *file_name;
     size_t file_size; // in bytes
 
-    unsigned char hash[32]; // sha256
-    char checksum[65]; // string representation of the hash
+    char checksum[65]; // string representation of the sha256 hash
 };
 
 int file_info_init(struct file_info *_file_info);
