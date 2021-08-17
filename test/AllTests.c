@@ -3,7 +3,6 @@
 
 CuSuite* FileInfoLoadGetSuite();
 CuSuite* JsonSerializationSuite();
-CuSuite* ColisionSuite();
 
 void RunFileInfoTest(void)
 {
@@ -31,24 +30,10 @@ void RunJsonTests(void)
     printf("%s\n", output->buffer);
 }
 
-void RunColisionTests(void)
-{
-    CuString *output = CuStringNew();
-    CuSuite *suite = CuSuiteNew();
-
-    CuSuiteAddSuite(suite, ColisionSuite());
-
-    CuSuiteRun(suite);
-    CuSuiteSummary(suite, output);
-    CuSuiteDetails(suite, output);
-    printf("%s\n", output->buffer);
-}
-
 void RunAllTests(void)
 {
     RunFileInfoTest();
     RunJsonTests();
-    RunColisionTests();
 }
 
 int main(void)

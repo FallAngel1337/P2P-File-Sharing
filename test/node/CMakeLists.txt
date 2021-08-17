@@ -1,0 +1,10 @@
+add_library(
+    node_serr_test
+    node_serr_test.c
+    ../../src/include/node/serr/node_serr.c
+    ../../src/include/node/serr/node_serr.h
+    ../../src/include/node/node.c
+    ../../src/include/node/node.h
+    ../cutest/CuTest.c
+    ../cutest/CuTest.h
+)
