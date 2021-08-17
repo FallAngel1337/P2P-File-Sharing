@@ -97,53 +97,63 @@ struct Node* nodeDeserialize(const char *json, struct Node *_node)
 {
     cJSON *version = NULL;
     cJSON *node_data = NULL;
-    cJSON *file = NULL;
-    cJSON *addr = NULL;
+    cJSON *data = NULL;
 
     cJSON *torrent = cJSON_Parse(json);
-    if (!torrent) goto end;
+    if (!torrent) 
+    {
+        fprintf(stderr, "Could nopt parse the torrent file\n");
+        cJSON_Delete(torrent);
+        return NULL;
+    }
 
     version = cJSON_GetObjectItemCaseSensitive(torrent, "version");
-    if (!cJSON_IsString(version) || !version->valuestring) goto end;
+    if (!cJSON_IsString(version) || !version->valuestring)
+    {
+        fprintf(stderr, "Invalid version\n");
+        cJSON_Delete(torrent);
+        return NULL;
+    }
 
     node_data = cJSON_GetObjectItemCaseSensitive(torrent, "node_data");
     
-    // File info
-    cJSON_ArrayForEach(file, node_data)
+    cJSON_ArrayForEach(data, node_data)
     {
-        cJSON *file_name = cJSON_GetObjectItemCaseSensitive(file, "file_name");
-        cJSON *file_size = cJSON_GetObjectItemCaseSensitive(file, "file_size");
-        cJSON *checksum = cJSON_GetObjectItemCaseSensitive(file, "checksum");
-
-        if (!cJSON_IsString(file_name) || !file_name->valuestring) goto end;
-        if (!cJSON_IsNumber(file_size)) goto end;
-        if (!cJSON_IsString(checksum) || !checksum->valuestring) goto end;
-
-        _node->fileinfo->file_size = file_size->valueint,
-        _node->fileinfo->file_name = file_name->valuestring;
-        memcpy(_node->fileinfo->checksum, checksum->valuestring, 65);
-    }
-
-    // Address
-    cJSON_ArrayForEach(addr, node_data)
-    {
-        cJSON *ip = cJSON_GetObjectItemCaseSensitive(addr, "ip");
-        cJSON *port = cJSON_GetObjectItemCaseSensitive(addr, "port");
-
-        if (!cJSON_IsString(ip) || !ip->valuestring) goto end;
-        if (!cJSON_IsNumber(port)) goto end;
-
+        cJSON *file_name = cJSON_GetObjectItemCaseSensitive(data, "file_name");
+        cJSON *file_size = cJSON_GetObjectItemCaseSensitive(data, "file_size");
+        cJSON *checksum = cJSON_GetObjectItemCaseSensitive(data, "checksum");
+        cJSON *ip = cJSON_GetObjectItemCaseSensitive(data, "ip");
+        cJSON *port = cJSON_GetObjectItemCaseSensitive(data, "port");
         memset(&_node->addr, 0, sizeof(_node->addr));
         _node->addr.sin_family = AF_INET;
-        _node->addr.sin_addr.s_addr = inet_addr(ip->valuestring);
-        _node->addr.sin_port = htons(port->valueint);
+
+        if (cJSON_IsString(file_name) && file_name->valuestring)
+        {
+            _node->fileinfo->file_name = file_name->valuestring;
+        }
+
+        if (cJSON_IsNumber(file_size))
+        {
+            _node->fileinfo->file_size = file_size->valueint;
+        }
+
+        if (cJSON_IsString(checksum) && checksum->valuestring)
+        {
+            memcpy(_node->fileinfo->checksum, checksum->valuestring, 65);
+        }
+
+        if (cJSON_IsString(ip) && ip->valuestring)
+        {
+            _node->addr.sin_addr.s_addr = inet_addr(ip->valuestring);
+        }
+
+        if (cJSON_IsNumber(port))
+        {
+            _node->addr.sin_port = htons(port->valueint);
+        }
     }
 
     return _node;
-
-end:
-    cJSON_Delete(torrent);
-    return NULL;
 }
 
 static char* change_file_extension(const char *_file_name, const char *__restrict__ _new_ext)
