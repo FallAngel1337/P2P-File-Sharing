@@ -22,6 +22,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <string.h>
 #include <libconfig.h>
 #include <stdbool.h>
@@ -40,6 +41,12 @@ static inline bool is_a_torrent(const char *_filename)
 {
     char *_ext = get_file_ext(_filename);
     return (!_ext || strcmp(_ext, "torrent")) ? false : true;
+}
+
+static inline uint16_t use_random_port()
+{
+    srandom(time(NULL));
+    return random() % 65536;
 }
 
 int main(int argc, char **argv)
@@ -73,6 +80,17 @@ int main(int argc, char **argv)
     
     config_lookup_string(&conf, "CSERVER_IP", &CSERVER_IP);
     config_lookup_int(&conf, "CSERVER_PORT", &CSERVER_PORT);
+
+    if (CLIENT_PORT == 0 || CLIENT_PORT > 65535) 
+    {
+        printf("Invalid PORT value! Using a radomly choosen one ...\n");
+        config_setting_t *PORT;
+        CLIENT_PORT = use_random_port();
+        PORT = config_lookup(&conf, "CLIENT_PORT");
+        config_setting_set_int(PORT, CLIENT_PORT);
+        config_write_file(&conf, CLIENT_CONFIG_FILE);
+        printf("Writed %u to config file: %s\n", CLIENT_PORT, CLIENT_CONFIG_FILE);
+    }
 
     struct Node *node = node_create(CLIENT_IP, CLIENT_PORT);
 

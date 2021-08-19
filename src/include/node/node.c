@@ -7,12 +7,6 @@
 #include <limits.h>
 #include <time.h>
 
-static inline uint32_t use_random_port()
-{
-    srandom(time(NULL));
-    return random() % 65536;
-}
-
 struct Node* node_create(const char *__restrict__ ip, uint32_t port)
 {
     struct Node *node = malloc(sizeof(struct Node));
@@ -23,7 +17,7 @@ struct Node* node_create(const char *__restrict__ ip, uint32_t port)
     addr = (struct sockaddr_in) {
         .sin_family = AF_INET,
         .sin_addr.s_addr = inet_addr(ip),
-        .sin_port = (port) ? htons(port) : htons(use_random_port()),
+        .sin_port = htons(port),
     };
 
     file_info_init(fileinfo);
