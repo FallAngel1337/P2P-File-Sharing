@@ -19,7 +19,9 @@ void show_table(struct rtable **_table, size_t rtableSize);
 struct rtable** table_create(size_t rtableSize);
 void table_destroy(struct rtable **_table, size_t rtableSize);
 
-int table_insert(struct rtable **_table, struct Node *node, size_t _size);
-int table_remove(struct rtable **_table, struct Node *node, size_t _size);
+int table_insert(struct rtable **_table, struct Node *node, size_t rtableSize);
+int table_remove(struct rtable **_table, struct Node *node, size_t rtableSize);
+
+struct Node* table_lookup(struct rtable **_table, struct file_info *_file, size_t rtableSize);
 
 #endif /* _RTABLE_H */

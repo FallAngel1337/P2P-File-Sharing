@@ -109,7 +109,12 @@ int main(int argc, char **argv)
             break;
         }
 
-        send(connfd, buf, 512, 0);
+        struct Node *lookup_node = table_lookup(table, node->fileinfo, RTABLE_SIZE);
+        char *nodeserr = nodeSerialize(lookup_node);
+        if (send(connfd, nodeserr, strlen(nodeserr)+1, 0) < 0) {
+            fprintf(stderr, "Was not possible to send json! error: %s\n", strerror(errno));
+            break;
+        }
 
         show_table(table, RTABLE_SIZE);
 
