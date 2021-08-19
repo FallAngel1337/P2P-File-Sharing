@@ -86,18 +86,10 @@ static bool check_attribs(struct file_info *_file1, struct file_info *_file2)
 
 struct Node* table_lookup(struct rtable **_table, struct file_info *_file, size_t rtableSize)
 {
-    for (size_t i = 0; i < rtableSize; i++)
-    {
-        struct rtable *curr = _table[i];
-        if (curr->node) {
-            struct Node *curr_node = curr->node;
-            if (check_attribs(curr_node->fileinfo, _file)) return curr_node;
-            while (curr->next) {
-                struct Node *curr_node = curr->node;
-                if (check_attribs(curr_node->fileinfo, _file)) return curr_node;
-                curr = curr->next;
-            }
-        }
+    struct rtable *curr = _table[mulhashing(get_hash(_file->checksum), rtableSize)];
+    while (curr->node) {
+        if (check_attribs(curr->node->fileinfo, _file)) return curr->node;
+        curr = curr->next;
     }
 
     return NULL;
