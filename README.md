@@ -9,7 +9,14 @@ A P2P file sharing network
 - [How to use?](#how-to-use)
 
 ## How it works?
-<write about how it works later\>
+It's basically a Bittorrent-like network implementation.
+First of all, you need to create the torret file.
+For that you just need to pass the file to the client arguments. This will generate a JSON file containing the
+file fields and metadata. After that the server will know that you have one copy of the original file and will add you the owners list. Also other nodes can download it from you (this feature is under development).
+
+To share the file to others, you give them your torrent file. Then they'll send that to their clients and the server will reply with the file owner IP:PORT, so that the client can download the file from you.
+
+The server does not store any single byte of the file you are sharing, just some metadata info.
 
 ## How to install?
 Choose from where you want and follow the instructions to install the program.
@@ -50,7 +57,7 @@ For now, you need to build both separately.
     $ cd build
     $ cmake ..
     $ make
-    $ ./P2P-Client --help
+    $ ./P2P-Client <file>
     ```
 
 - Building the server (not working)
@@ -60,5 +67,7 @@ For now, you need to build both separately.
     $ cd build
     $ cmake ..
     $ make
-    $ ./P2P-Server --help
+    $ ./P2P-Server
     ```
+
+## How to use?
