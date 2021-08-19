@@ -31,7 +31,7 @@
 }
  */
 
-char* nodeSerialize(struct Node *_node)
+char* nodeSerialize(struct Node *_node, uint8_t _flags)
 {
     char *json = NULL;
     cJSON *version = NULL;
@@ -74,16 +74,22 @@ char* nodeSerialize(struct Node *_node)
     cJSON_AddItemToArray(node_data, file);
 
     // Adding node address to the array
-    addr = cJSON_CreateObject();
-    if (!addr) goto end;
+    if (_flags&SERR_NET) {
+        addr = cJSON_CreateObject();
+        if (!addr) goto end;
 
-    ip = cJSON_CreateString(inet_ntoa(_node->addr.sin_addr));
-    port = cJSON_CreateNumber(_node->addr.sin_port);
+        if (_flags&SERR_IP) {
+            ip = cJSON_CreateString(inet_ntoa(_node->addr.sin_addr));
+            cJSON_AddItemToObject(addr, "ip", ip);
+        }
 
-    cJSON_AddItemToObject(addr, "ip", ip);
-    cJSON_AddItemToObject(addr, "port", port);
+        if (_flags&SERR_PORT) {
+            port = cJSON_CreateNumber(_node->addr.sin_port);
+            cJSON_AddItemToObjet(addr, "port", port);
+        }
 
-    cJSON_AddItemToArray(node_data, addr);
+        cJSON_AddItemToArray(node_data, addr);
+    }
 
     json = cJSON_Print(torrent);
     if (!json) goto end;
@@ -93,7 +99,7 @@ end:
     return json;
 }
 
-struct Node* nodeDeserialize(const char *json, struct Node *_node)
+struct Node* nodeDeserialize(const char *json, struct Node *_node, uint8_t _flags)
 {
     if (!_node) _node = node_create("0.0.0.0", 9999);
     cJSON *version = NULL;
@@ -166,11 +172,11 @@ static char* change_file_extension(const char *_file_name, const char *__restric
     return __file_name;
 }
 
-int jsonWriteFile(char **_file_name, struct Node *_node)
+int jsonWriteFile(char **_file_name, struct Node *_node, uint8_t _flags)
 {
     int fd, ret = 0;
     char *_new_filename;
-    const char *_json = nodeSerialize(_node);
+    const char *_json = nodeSerialize(_node, _flags);
 
     _new_filename = change_file_extension(_node->fileinfo->file_name, ".torrent");
     if (_file_name) *_file_name = _new_filename;
@@ -199,7 +205,7 @@ int jsonWriteFile(char **_file_name, struct Node *_node)
     return 0;
 }
 
-char* jsonReadFile(const char *_file_name, struct Node *_node)
+char* jsonReadFile(const char *_file_name, struct Node *_node, uint8_t _flags)
 {
     struct stat st;
     int fd;
@@ -232,7 +238,7 @@ char* jsonReadFile(const char *_file_name, struct Node *_node)
         return NULL;
     }
 
-    if(!nodeDeserialize(buf, _node))
+    if(!nodeDeserialize(buf, _node, _flags))
     {
         fprintf(stderr, "Was not possible to deserialize %s (%s)\n", _file_name, strerror(errno));
         close(fd);

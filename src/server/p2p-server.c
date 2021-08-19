@@ -103,7 +103,7 @@ int main(int argc, char **argv)
             break;
         }
 
-        struct Node *node = nodeDeserialize(buf, NULL);
+        struct Node *node = nodeDeserialize(buf, NULL, 0);
         if (table_insert(table, node, RTABLE_SIZE) < 0) {
             fprintf(stderr, "Was not possible to insert node\n");
             break;

@@ -25,7 +25,7 @@ int recvfromc(int _fd, struct Node *_node)
     printf("%s\n", _buf);
 #endif
 
-    if (!nodeDeserialize(_buf, _node)) {
+    if (!nodeDeserialize(_buf, _node, 0)) {
         fprintf(stderr, "recvfromc failed to deserialize\n");
         close(_fd); free(_buf);
         return -1;

@@ -22,22 +22,27 @@
 
 #include "../node.h"
 
+// Special serialization flags
+#define SERR_IP   1
+#define SERR_PORT 2
+#define SERR_NET  3
+
 // Node serialization functions
-char* nodeSerialize(struct Node *_node);
-struct Node* nodeDeserialize(const char *json, struct Node *_node);
+char* nodeSerialize(struct Node *_node, uint8_t _flags);
+struct Node* nodeDeserialize(const char *json, struct Node *_node, uint8_t _flags);
 
 
 /**
  * `jsonWriteFile` load the `_node` structure into a JSON file.
  * And write the new filename into `_file_name` a malloc'd string.
 */
-int jsonWriteFile(char **_file_name, struct Node *_node);
+int jsonWriteFile(char **_file_name, struct Node *_node, uint8_t _flags);
 
 /**
  * `jsonReadFile` read a JSON file indicated by `_file_name`
  *  and fill the `_node` structure. Return NULL on error
  *  and a pointer to the JSON content.
  */
-char* jsonReadFile(const char *_file_name, struct Node *__node);
+char* jsonReadFile(const char *_file_name, struct Node *_node, uint8_t _flags);
 
 #endif /* _JSON_SERIALIZATION */
