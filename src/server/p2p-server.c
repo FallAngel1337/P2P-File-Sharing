@@ -103,16 +103,24 @@ int main(int argc, char **argv)
             break;
         }
 
-        struct Node *node = nodeDeserialize(buf, NULL, 0);
-        if (table_insert(table, node, RTABLE_SIZE) < 0) {
-            fprintf(stderr, "Was not possible to insert node\n");
+        struct Node *client_node = nodeDeserialize(buf, NULL, SERR_NET);
+        char *nodeserr;
+
+        struct Node *lookup_node = table_lookup(table, client_node->fileinfo, RTABLE_SIZE);
+        if (!lookup_node) {
+            fprintf(stderr, "Was not possible to find the node!\n");
+            nodeserr = nodeSerialize(client_node, 0);
+        } else {
+            nodeserr = nodeSerialize(lookup_node, SERR_NET);
+        }
+
+        if (send(connfd, nodeserr, strlen(nodeserr)+1, 0) < 0) {
+            fprintf(stderr, "Was not possible to send json! error: %s\n", strerror(errno));
             break;
         }
 
-        struct Node *lookup_node = table_lookup(table, node->fileinfo, RTABLE_SIZE);
-        char *nodeserr = nodeSerialize(lookup_node);
-        if (send(connfd, nodeserr, strlen(nodeserr)+1, 0) < 0) {
-            fprintf(stderr, "Was not possible to send json! error: %s\n", strerror(errno));
+        if (table_insert(table, client_node, RTABLE_SIZE) < 0) {
+            fprintf(stderr, "Was not possible to insert node\n");
             break;
         }
 

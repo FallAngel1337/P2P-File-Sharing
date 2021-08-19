@@ -29,7 +29,7 @@ void show_table(struct rtable **_table, size_t rtableSize)
     size_t i;
     for (i=0; i < rtableSize; i++) {
         struct rtable *curr = _table[i];
-        printf("================ Node' %lu ================\n", i);
+        printf("================ Entry' %lu ================\n", i);
         while (curr != NULL) {
             if (curr->node) {
                 printf("Node IP: %s\n", inet_ntoa(curr->node->addr.sin_addr));
@@ -37,8 +37,8 @@ void show_table(struct rtable **_table, size_t rtableSize)
                 printf("Node filename: %s\n", curr->node->fileinfo->file_name);
                 printf("Node file size: %lu\n", curr->node->fileinfo->file_size);  
                 printf("Node checksum: %s\n", curr->node->fileinfo->checksum);
+                printf("===========================================\n");
             }
-            printf("===========================================\n");
             curr = curr->next;
         }
 
