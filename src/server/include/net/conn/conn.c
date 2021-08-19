@@ -31,7 +31,6 @@ int recvfromc(int _fd, struct Node *_node)
         return -1;
     }
 
-
     free(_buf);
     return 0;
 }
