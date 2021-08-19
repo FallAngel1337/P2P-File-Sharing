@@ -9,7 +9,7 @@ A P2P file sharing network
 - [How to use?](#how-to-use)
 
 ## How it works?
-It's basically a Bittorrent-like network implementation.
+It's basically a BitTorrent-like network implementation.
 First of all, you need to create the torret file.
 For that you just need to pass the file to the client arguments. This will generate a JSON file containing the
 file fields and metadata. After that the server will know that you have one copy of the original file and will add you the owners list. Also other nodes can download it from you (this feature is under development).
