@@ -85,7 +85,7 @@ char* nodeSerialize(struct Node *_node, uint8_t _flags)
 
         if (_flags&SERR_PORT) {
             port = cJSON_CreateNumber(_node->addr.sin_port);
-            cJSON_AddItemToObjet(addr, "port", port);
+            cJSON_AddItemToObject(addr, "port", port);
         }
 
         cJSON_AddItemToArray(node_data, addr);
@@ -129,10 +129,6 @@ struct Node* nodeDeserialize(const char *json, struct Node *_node, uint8_t _flag
         cJSON *file_name = cJSON_GetObjectItemCaseSensitive(data, "file_name");
         cJSON *file_size = cJSON_GetObjectItemCaseSensitive(data, "file_size");
         cJSON *checksum = cJSON_GetObjectItemCaseSensitive(data, "checksum");
-        cJSON *ip = cJSON_GetObjectItemCaseSensitive(data, "ip");
-        cJSON *port = cJSON_GetObjectItemCaseSensitive(data, "port");
-        memset(&_node->addr, 0, sizeof(_node->addr));
-        _node->addr.sin_family = AF_INET;
 
         if (cJSON_IsString(file_name) && file_name->valuestring)
         {
@@ -149,14 +145,23 @@ struct Node* nodeDeserialize(const char *json, struct Node *_node, uint8_t _flag
             memcpy(_node->fileinfo->checksum, checksum->valuestring, 65);
         }
 
-        if (cJSON_IsString(ip) && ip->valuestring)
-        {
-            _node->addr.sin_addr.s_addr = inet_addr(ip->valuestring);
-        }
+        if (_flags&SERR_NET) {
+            if (_flags&SERR_IP) {
+                cJSON *ip = cJSON_GetObjectItemCaseSensitive(data, "ip");
+                if (cJSON_IsString(ip) && ip->valuestring)
+                {
+                    _node->addr.sin_addr.s_addr = inet_addr(ip->valuestring);
+                }
+            }
+            
+            if (_flags&SERR_PORT) {
+                cJSON *port = cJSON_GetObjectItemCaseSensitive(data, "port");
+                if (cJSON_IsNumber(port))
+                {
+                    _node->addr.sin_port = htons(port->valueint);
+                }
+            }
 
-        if (cJSON_IsNumber(port))
-        {
-            _node->addr.sin_port = htons(port->valueint);
         }
     }
 

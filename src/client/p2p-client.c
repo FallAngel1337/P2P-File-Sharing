@@ -93,11 +93,17 @@ int main(int argc, char **argv)
     }
 
     struct Node *node = node_create(CLIENT_IP, CLIENT_PORT);
+    char *json = NULL;
 
     if (is_a_torrent(filename)) {
-        char *json = NULL;
-        if (!(json = jsonReadFile(filename, node))) {
-            fprintf(stderr, "Could not load the json content of the file %s\n", filename);
+        if (!jsonReadFile(filename, node, 0)) {
+            fprintf(stderr, "Could not load the json file_info content of the file %s\n", filename);
+            config_destroy(&conf);
+            return -1;
+        }
+
+        if (!(json = nodeSerialize(node, SERR_NET))) {
+            fprintf(stderr, "Could not load the json addr info content of the file %s\n", filename);
             config_destroy(&conf);
             return -1;
         }
@@ -106,8 +112,6 @@ int main(int argc, char **argv)
         char buf[512];
         recvfromn(nodefd, buf, 512);
         printf("%s\n", buf);
-
-        free(json);       
     } else {
         if (file_info_load(filename, node->fileinfo) < 0) {
             fprintf(stderr, "Could not load the file %s\n", filename);
@@ -115,16 +119,26 @@ int main(int argc, char **argv)
             return -1;
         }
 
-        if (jsonWriteFile(&filename, node) < 0) {
+        if (jsonWriteFile(&filename, node, 0) < 0) {
             fprintf(stderr, "Could not create the torrent\n");
             config_destroy(&conf);
             return -1;
         }
         printf("Created %s successfully!\n", filename);
+
+        json = nodeSerialize(node, SERR_NET);
+
+        int nodefd = connectton(CSERVER_IP, CSERVER_PORT, json, strlen(json)+1);
+        char buf[512];
+        recvfromn(nodefd, buf, 512);
+
+        printf("%s\n", buf);
+
         free(filename);
     }
 
     config_destroy(&conf);
     node_destroy(node);
+    free(json);       
     return 0;
 }
