@@ -109,6 +109,8 @@ int main(int argc, char **argv)
             break;
         }
 
+        send(connfd, buf, 512, 0);
+
         show_table(table, RTABLE_SIZE);
 
         free(buf);

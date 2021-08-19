@@ -18,15 +18,11 @@
 #include <stdint.h>
 #include <netinet/in.h>
 
-// Connect to the server and send `n` bytes of `buf`.
-int connecttos(const char *__restrict__ ip, uint32_t port, 
+// Connect to a node(could be the server too) and send `n` bytes of `buf`.
+int connectton(const char *__restrict__ ip, uint32_t port, 
                const void *__restrict__ _buf, size_t _n);
 
-// Store the response from the server in
-// `n` bytes of `buf`. 
-int recvfroms(int _fd, void *__restrict__ _buf, size_t _n);
-
-// Connect to another client and send `n` bytes of `buf`.
-int connecttoc(struct sockaddr_in *addr, const void *__restrict__ _buf, size_t _n);
+// Recieve from a node and write the reponse in `n` bytes of `_buf`
+int recvfromn(int _fd, void *__restrict__ _buf, size_t _n);
 
 #endif /*  _CONNECTION_H */

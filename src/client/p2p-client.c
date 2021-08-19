@@ -102,7 +102,10 @@ int main(int argc, char **argv)
             return -1;
         }
 
-        connecttos(CSERVER_IP, CSERVER_PORT, json, strlen(json)+1);
+        int nodefd = connectton(CSERVER_IP, CSERVER_PORT, json, strlen(json)+1);
+        char buf[512];
+        recvfromn(nodefd, buf, 512);
+        printf("%s\n", buf);
 
         free(json);       
     } else {

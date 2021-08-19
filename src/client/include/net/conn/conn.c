@@ -12,7 +12,7 @@
 
 #define BACKLOG_MAX 5
 
-int connecttos(const char *__restrict__ ip, uint32_t port, 
+int connectton(const char *__restrict__ ip, uint32_t port, 
                const void *__restrict__ _buf, size_t _n)
 {
     struct sockaddr_in addr;
@@ -44,17 +44,12 @@ int connecttos(const char *__restrict__ ip, uint32_t port,
     return sockfd;
 }
 
-int recvfroms(int _fd, void *__restrict__ _buf, size_t _n)
+int recvfromn(int _fd, void *__restrict__ _buf, size_t _n)
 {
     if (recv(_fd, _buf, _n, 0) < 0) {
         fprintf(stderr, "Could not recv from socket: %s\n", strerror(errno));
         return -1;
     }
 
-    return -1;
-}
-
-int connecttoc(struct sockaddr_in *addr, const void *__restrict__ _buf, size_t _n)
-{
     return 0;
 }
