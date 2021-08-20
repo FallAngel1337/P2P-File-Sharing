@@ -18,7 +18,7 @@ The project stills under development, so if something is missing or its bad, don
 It's basically a BitTorrent-like network implementation. So you have those who have the file and provide it tho the other nodes (seeders) and the other who donwload the file and become seeders too.
 
  
- It uses a torrent file, that is basically a `JSON` format file that contains some file metadata.
+It uses a torrent file, that is basically a `JSON` format file that contains some file metadata.
 
 
 Below we have a simple diagram showing how the client handles the creation of the torrent file.
