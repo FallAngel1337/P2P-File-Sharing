@@ -23,7 +23,7 @@ static void file_checksum(struct file_info *_file_info, unsigned char *_content)
     char *data;
     unsigned char hash[32];
     asprintf(&data, "%s%ld%s", _file_info->file_name,  _file_info->file_size, _content);
-    SHA256(data, SHA256_DIGEST_LENGTH, hash);
+    SHA256((unsigned char*)data, SHA256_DIGEST_LENGTH, hash);
     for (int i=0; i < 32; i++) {
         sprintf(_file_info->checksum + (i*2), "%02x", hash[i]);
     }
