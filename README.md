@@ -1,5 +1,6 @@
 # P2P-File-Sharing
-A P2P file sharing network
+A P2P file sharing network.
+The project stills under development, so if something is missing or its bad, don't worry, I'll take care of it.
 
 # Index
 - [How it works? ](#how-it-works)
@@ -8,15 +9,29 @@ A P2P file sharing network
     - [Install from source](#install-from-source)
 - [How to use?](#how-to-use)
 
+## Todo list
+- [ ] Create the listen client daemon to send the requested file.
+- [ ] Do soem code refactoring (readability)
+- [ ] Use protobuf instead of JSON?
+
 ## How it works?
-It's basically a Bittorrent-like network implementation.
-First of all, you need to create the torret file.
-For that you just need to pass the file to the client arguments. This will generate a JSON file containing the
-file fields and metadata. After that the server will know that you have one copy of the original file and will add you the owners list. Also other nodes can download it from you (this feature is under development).
+It's basically a BitTorrent-like network implementation. So you have those who have the file and provide it tho the other nodes (seeders) and the other who donwload the file and become seeders too.
 
-To share the file to others, you give them your torrent file. Then they'll send that to their clients and the server will reply with the file owner IP:PORT, so that the client can download the file from you.
+ 
+ It uses a torrent file, that is basically a `JSON` format file that contains some file metadata.
 
-The server does not store any single byte of the file you are sharing, just some metadata info.
+
+Below we have a simple diagram showing how the client handles the creation of the torrent file.
+
+ ![Client-Side](images/client-side-workflow.png)
+
+ Also how the server reply you with the file owner `IP` and `PORT` and add you the file owner list.
+
+ ![Server-Side](images/server-uploading.png)
+
+ And finally how the download workflow is.
+
+ ![Downloading](images/downloading.png)
 
 ## How to install?
 Choose from where you want and follow the instructions to install the program.
@@ -46,6 +61,11 @@ Before installing make sure you have installed the following dependencies:
 ```
 $ git clone https://githubcom/FallAngel1337/P2P-File-Sharing
 $ cd P2P-File-Sharing
+```
+
+After that you can configure the client and server through the config files located at `conf` folder.
+Then continue with 
+```
 $ make
 ```
 
@@ -69,5 +89,3 @@ For now, you need to build both separately.
     $ make
     $ ./P2P-Server
     ```
-
-## How to use?
