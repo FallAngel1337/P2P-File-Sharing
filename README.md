@@ -1,4 +1,6 @@
+![C](https://img.shields.io/badge/c-%2300599C.svg?style=for-the-badge&logo=c&logoColor=white)
 # P2P-File-Sharing
+
 A P2P file sharing network.
 The project stills under development, so if something is missing or its bad, don't worry, I'll take care of it.
 
