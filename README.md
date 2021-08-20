@@ -15,11 +15,11 @@ The project stills under development, so if something is missing or its bad, don
 - [ ] Use protobuf instead of JSON?
 
 ## How it works?
-It's basically a BitTorrent-like network implementation. So you have those who have the file and provide it tho the other nodes (seeders) and the other who donwload the file and become seeders too.
+It's basically a BitTorrent-like network implementation. So you have those who have the file and provide it tho the other nodes (seeders) and the other who download the file and become seeders too. With a Centralized P2P architecture.
 
  
 It uses a torrent file, that is basically a `JSON` format file that contains some file metadata.
-
+The server does not provide the file itself, but just points/indexes to who owns the file, also it doesn't stores any single byte of the file in it.
 
 Below we have a simple diagram showing how the client handles the creation of the torrent file.
 
