@@ -191,19 +191,21 @@ int jsonWriteFile(char **_file_name, struct Node *_node, uint8_t _flags)
         if (errno != EEXIST) {
             fprintf(stderr, "Could not open/create the %s file (%s)\n", _new_filename, strerror(errno));
         }
+        *_file_name = NULL;
+        free(_new_filename);
         err = -1; goto clean;
     }
 
     if (write(fd, _json, strlen(_json)) < 0)
     {
         fprintf(stderr, "Could not write to the %s file (%s)\n", _new_filename, strerror(errno));
+        *_file_name = NULL;
+        free(_new_filename);
         err = -1; goto clean;
     }
 
 clean:
     free(_json);
-    free(_new_filename);
-    *_file_name = NULL;
     close(fd);
     return err;
 }
