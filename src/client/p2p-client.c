@@ -96,7 +96,7 @@ int main(int argc, char **argv)
     char *json = NULL;
 
     if (is_a_torrent(filename)) {
-        if (!jsonReadFile(filename, node, 0)) {
+        if (jsonReadFile(filename, node, 0) < 0) {
             fprintf(stderr, "Could not load the json file_info content of the file %s\n", filename);
             config_destroy(&conf);
             return -1;

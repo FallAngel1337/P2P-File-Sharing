@@ -40,9 +40,8 @@ int jsonWriteFile(char **_file_name, struct Node *_node, uint8_t _flags);
 
 /**
  * `jsonReadFile` read a JSON file indicated by `file_name`
- *  and fill the `node` structure. Return NULL on error
- *  and a pointer to the JSON content.
+ *  and fill the `node` structure. Return -1 on error.
  */
-char* jsonReadFile(const char *_file_name, struct Node *_node, uint8_t _flags);
+int jsonReadFile(const char *_file_name, struct Node *_node, uint8_t _flags);
 
 #endif /* _NODE_SERR_H */

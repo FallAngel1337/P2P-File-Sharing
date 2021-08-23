@@ -163,7 +163,7 @@ struct Node* nodeDeserialize(const char *json, struct Node *_node, uint8_t _flag
 
         }
     }
-
+    
     return _node;
 }
 
@@ -209,7 +209,7 @@ int jsonWriteFile(char **_file_name, struct Node *_node, uint8_t _flags)
     return 0;
 }
 
-char* jsonReadFile(const char *_file_name, struct Node *_node, uint8_t _flags)
+int jsonReadFile(const char *_file_name, struct Node *_node, uint8_t _flags)
 {
     struct stat st;
     int fd;
@@ -218,37 +218,38 @@ char* jsonReadFile(const char *_file_name, struct Node *_node, uint8_t _flags)
     if ((fd = open(_file_name, O_RDONLY)) < 0)
     {   
         fprintf(stderr, "Could not open the %s file (%s)\n", _file_name, strerror(errno));
-        return NULL;
+        return -1;
     }
 
     if (fstat(fd, &st) < 0)
     {
         fprintf(stderr, "Could not load %s file stats (%s)\n", _file_name, strerror(errno));
         close(fd);
-        return NULL;
+        return -1;
     }
 
     if (!(buf = calloc(1, st.st_size)))
     {
         fprintf(stderr, "malloc error (%s)\n", strerror(errno));
         close(fd);
-        return NULL;
+        return -1;
     }
 
     if (read(fd, buf, st.st_size) < 0)
     {
         fprintf(stderr, "Could not read %s file (%s)\n", _file_name, strerror(errno));
         close(fd);
-        return NULL;
+        return -1;
     }
 
     if(!nodeDeserialize(buf, _node, _flags))
     {
         fprintf(stderr, "Was not possible to deserialize %s (%s)\n", _file_name, strerror(errno));
         close(fd);
-        return NULL;
+        return -1;
     }
 
     close(fd);
-    return buf;
+    free(buf);
+    return 0;
 }
