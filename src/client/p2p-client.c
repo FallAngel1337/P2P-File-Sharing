@@ -94,7 +94,7 @@ int main(int argc, char **argv)
         printf("Writed %u to config file: %s\n", CLIENT_PORT, CLIENT_CONFIG_FILE);
     }
 
-    struct Node *node = node_create(CLIENT_IP, CLIENT_PORT);
+    struct Node *node = node_create(CLIENT_IP, CLIENT_PORT), *seeder;
     char *json = NULL;
 
     if (is_a_torrent(filename)) {
@@ -117,9 +117,14 @@ int main(int argc, char **argv)
             fprintf(stderr, "Could not create the torrent\n");
             err = -1; goto clean;
         }
+
         printf("Created %s successfully!\n", filename);
 
-        json = nodeSerialize(node, SERR_NET);
+        if (!(json = nodeSerialize(node, SERR_NET))) {
+            fprintf(stderr, "Was not possible to deserialize the node!\n");
+            free(filename);
+            err = -1; goto clean;
+        }
 
         free(filename);
     }
@@ -127,12 +132,20 @@ int main(int argc, char **argv)
 
     int nodefd = connectton(CSERVER_IP, CSERVER_PORT, json, strlen(json)+1);
     char buf[512];
-    recvfromn(nodefd, buf, 512);
-    printf("%s\n", buf);
+    if (recvfromn(nodefd, buf, 512)) {
+        err = -1; goto clean;
+    }
+    
+    if (!(seeder = nodeDeserialize(buf, NULL, SERR_NET))) {
+        err = -1; goto clean;
+    }
 
+    printf("IP: %s\nPORT: %d\n", inet_ntoa(seeder->addr.sin_addr), ntohs(seeder->addr.sin_port));
+    
 clean:
     config_destroy(&conf);
     node_destroy(node);
+    node_destroy(seeder);
     free(json);       
     return err;
 }

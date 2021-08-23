@@ -108,7 +108,7 @@ struct Node* nodeDeserialize(const char *json, struct Node *_node, uint8_t _flag
     cJSON *torrent = cJSON_Parse(json);
     if (!torrent) 
     {
-        fprintf(stderr, "Could nopt parse the torrent file\n");
+        fprintf(stderr, "Could not parse the torrent file\n");
         cJSON_Delete(torrent);
         return NULL;
     }
