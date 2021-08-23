@@ -35,11 +35,9 @@ int file_info_init(struct file_info *_file_info)
 {
     if (!_file_info) return -1;
 
-    *_file_info = (struct file_info) {
-        .file_name = NULL,
-        .file_size = 0,
-    };
+    _file_info->file_size = 0,
 
+    memset((char*)_file_info->file_name, 0, SHA256_DIGEST_LENGTH*2);
     memset(_file_info->checksum, 0, SHA256_DIGEST_LENGTH*2);
 
     return 0;
@@ -80,7 +78,7 @@ int file_info_load(const char *__restrict__ _filename, struct file_info *_file_i
         return -1;
     }
 
-    _file_info->file_name = basename((char*)_filename);
+    memcpy((char*)_file_info->file_name, basename((char*)_filename), MAX_FILENAME);
     _file_info->file_size = st.st_size,
 
     file_checksum(_file_info, content);

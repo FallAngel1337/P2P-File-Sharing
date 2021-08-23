@@ -131,7 +131,7 @@ struct Node* nodeDeserialize(const char *json, struct Node *_node, uint8_t _flag
 
         if (cJSON_IsString(file_name) && file_name->valuestring)
         {
-            _node->fileinfo->file_name = file_name->valuestring;
+            memcpy((char*)_node->fileinfo->file_name, file_name->valuestring, MAX_FILENAME);
         }
 
         if (cJSON_IsNumber(file_size))

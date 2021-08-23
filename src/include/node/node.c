@@ -11,6 +11,7 @@ struct Node* node_create(const char *__restrict__ ip, uint32_t port)
 {
     struct Node *node = malloc(sizeof(struct Node));
     struct file_info *fileinfo = calloc(1, sizeof(struct file_info));
+    fileinfo->file_name = malloc(MAX_FILENAME); // max filename size
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(addr));
 
@@ -32,6 +33,7 @@ struct Node* node_create(const char *__restrict__ ip, uint32_t port)
 
 int node_destroy(struct Node *node)
 {
+    free((char*)node->fileinfo->file_name);
     free(node->fileinfo);
     free(node);
     return 0;

@@ -16,6 +16,10 @@
 #ifndef _FILE_INFO_H
 #define _FILE_INFO_H
 
+#ifndef MAX_FILENAME 
+    #define MAX_FILENAME 255
+#endif
+
 #include <sys/types.h>
 
 // Need to be a REGULAR FILE

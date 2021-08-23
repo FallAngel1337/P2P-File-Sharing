@@ -13,6 +13,10 @@
 #ifndef _NODE_H
 #define _NODE_H
 
+#ifndef MAX_FILENAME 
+    #define MAX_FILENAME 255
+#endif
+
 #include "../file_info/file_info.h"
 
 #include <stdint.h>
