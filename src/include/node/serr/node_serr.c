@@ -164,6 +164,7 @@ struct Node* nodeDeserialize(const char *json, struct Node *_node, uint8_t _flag
         }
     }
     
+    cJSON_Delete(torrent);
     return _node;
 }
 
@@ -178,9 +179,9 @@ static char* change_file_extension(const char *_file_name, const char *__restric
 
 int jsonWriteFile(char **_file_name, struct Node *_node, uint8_t _flags)
 {
-    int fd, ret = 0;
+    int fd, err = 0;
     char *_new_filename;
-    const char *_json = nodeSerialize(_node, _flags);
+    char *_json = nodeSerialize(_node, _flags);
 
     _new_filename = change_file_extension(_node->fileinfo->file_name, ".torrent");
     if (_file_name) *_file_name = _new_filename;
@@ -189,24 +190,22 @@ int jsonWriteFile(char **_file_name, struct Node *_node, uint8_t _flags)
     {
         if (errno != EEXIST) {
             fprintf(stderr, "Could not open/create the %s file (%s)\n", _new_filename, strerror(errno));
-            free(_new_filename);
-            *_file_name = NULL;
         }
-        close(fd);
-        return -1;
+        err = -1; goto clean;
     }
 
     if (write(fd, _json, strlen(_json)) < 0)
     {
         fprintf(stderr, "Could not write to the %s file (%s)\n", _new_filename, strerror(errno));
-        free(_new_filename);
-        *_file_name = NULL;
-        close(fd);
-        return -1;
+        err = -1; goto clean;
     }
 
+clean:
+    free(_json);
+    free(_new_filename);
+    *_file_name = NULL;
     close(fd);
-    return 0;
+    return err;
 }
 
 int jsonReadFile(const char *_file_name, struct Node *_node, uint8_t _flags)
