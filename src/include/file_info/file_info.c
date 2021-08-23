@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <openssl/sha.h>
+#include <limits.h>
 #include <libgen.h>
 
 static inline int is_regular_file(mode_t mode)
@@ -45,8 +46,8 @@ int file_info_init(struct file_info *_file_info)
 
 int file_info_load(const char *__restrict__ _filename, struct file_info *_file_info)
 {
-    if (!_filename || !_file_info) {
-        fprintf(stderr, "Can't use null values as parameters!\n");
+    if (!_filename || !_file_info || (strlen(_filename)+1) > FILENAME_MAX) {
+        fprintf(stderr, "Invalid filename\n");
         return -1;
     }
 
