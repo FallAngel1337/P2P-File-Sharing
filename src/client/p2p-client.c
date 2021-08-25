@@ -209,37 +209,38 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    struct Node *leecher = node_create(CLIENT_IP, CLIENT_PORT), *seeder = NULL;
+    struct Node *leecher = node_create("0.0.0.0", 0);
+    struct Node *seeder = node_create(CLIENT_IP, CLIENT_PORT);
     char *json = NULL;
 
     if (is_a_torrent(filename)) {
-        if (jsonReadFile(filename, leecher, 0) < 0) {
+        if (jsonReadFile(filename, seeder, 0) < 0) {
             fprintf(stderr, "Could not load the json file_info content of the file %s\n", filename);
             err = -1; goto clean;
         }
 
-        if (!(json = nodeSerialize(leecher, SERR_NET))) {
+        if (!(json = nodeSerialize(seeder, SERR_NET))) {
             fprintf(stderr, "Could not load the json addr info content of the file %s\n", filename);
             err = -1; goto clean;
         }
     } else {
-        if (file_info_load(filename, leecher->fileinfo) < 0) {
+        if (file_info_load(filename, seeder->fileinfo) < 0) {
             fprintf(stderr, "Could not load the file %s\n", filename);
             err = -1; goto clean;
         }
 
-        if (create_symlink(filename, leecher->fileinfo->file_name) < 0) {
+        if (create_symlink(filename, seeder->fileinfo->file_name) < 0) {
             err = -1; goto clean;
         }
     
-        if (jsonWriteFile(&filename, leecher, 0) < 0) {
+        if (jsonWriteFile(&filename, seeder, 0) < 0) {
             fprintf(stderr, "Could not create the torrent\n");
             err = -1; goto clean;
         }
 
         printf("Created %s successfully!\n", filename);
 
-        if (!(json = nodeSerialize(leecher, SERR_NET))) {
+        if (!(json = nodeSerialize(seeder, SERR_NET))) {
             fprintf(stderr, "Was not possible to deserialize the node!\n");
             free(filename);
             err = -1; goto clean;
@@ -260,8 +261,6 @@ int main(int argc, char **argv)
     }
 
     printf("IP: %s\nPORT: %d\n", inet_ntoa(seeder->addr.sin_addr), ntohs(seeder->addr.sin_port));
-
-    sendfile(NULL, leecher);
 
 clean:
     config_destroy(&conf);

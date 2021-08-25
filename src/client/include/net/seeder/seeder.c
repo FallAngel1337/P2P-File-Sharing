@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <fcntl.h>
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -23,40 +24,65 @@ static char* find_file(struct file_info *fileinfo)
         return NULL;
     }
 
-    if (!(dir = readdir(d))) {
-        LOG_ERROR("Could not read %s directory entries :: %s\n", CLIENT_TORRENTS, strerror(errno));
-        return NULL;
-    }
-
     while ((dir = readdir(d))) 
     {
-        printf(">> %s\n", dir->d_name);
+        if (strstr(dir->d_name, fileinfo->file_name)) break;
+        dir = readdir(d);
     }
 
     rewinddir(d);
     closedir(d);
 
-    return NULL;
+    char *buf = calloc(1, PATH_MAX);
+    chdir(CLIENT_TORRENTS);
+    readlink(dir->d_name, buf, PATH_MAX);
+    return buf;
 }
 
 int sendfile(struct Node *dst, struct Node *src)
 {
-    // if (!dst || !src) return -1;
+    if (!dst || !src) return -1;
 
-    int sock = 0;
+    int sock = 0, fd = 0;
+    int err = 0;
+
+    char *file = NULL;
+    char *data = calloc(1, src->fileinfo->file_size);
 
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         LOG_ERROR("socket error: %s\n", strerror(errno));
-        return -1;
+        err = -1; goto clean;
     }
+
+    file = find_file(src->fileinfo);
+
+    if ((fd = open(file, O_RDONLY)) < 0) {
+        LOG_ERROR("Failed to open file %s :: %s\n", file, strerror(errno));
+        err = -1; goto clean;
+    }
+
+    printf("file=%s\n", file);
+
+    if (read(fd, data, src->fileinfo->file_size) < 0) {
+        LOG_ERROR("Failed to read file %s :: %s\n", file, strerror(errno));
+        err = -1; goto clean;
+    }
+
 /*
-    if (connect(sock, (struct sockaddr_in*)&dst->addr, sizeof(dst->addr)) < 0) {
+    if (connect(sock, (struct sockaddr*)&dst->addr, sizeof(dst->addr)) < 0) {
         LOG_ERROR("Failed to connect to dst node: %s\n", strerror(errno));
-        return -1;
+        err = -1; goto clean;
+    }
+
+    if (send(sock, data, src->fileinfo->file_size, 0) < 0) {
+        LOG_ERROR("Failed to send the data :: %s\n", strerror(errno));
     }
 */
-    // if (send(sock, ) < 0)
 
-    find_file(src->fileinfo);
-    return 0;
+clean:
+    free(file);
+    free(data);
+    close(sock);
+    close(fd);
+    return err;
 }
