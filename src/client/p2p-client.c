@@ -84,16 +84,15 @@ static int create_torrent_dir(const char *__restrict__ _dir)
     return 0;
 }
 
-static int create_symlink(const char *__restrict__ _linkdir, 
-                          const char *__restrict__ old_filename,
+static int create_symlink(const char *__restrict__ old_filename,
                           const char *__restrict__ new_filename)
 {
     if (!old_filename || !new_filename) return -1;
-    if (create_torrent_dir(_linkdir) < 0) return -1;
+    if (create_torrent_dir(CLIENT_TORRENTS) < 0) return -1;
     char *link;
     int fd = 0;
 
-    if (asprintf(&link, "%s/%s_XXXXXX", _linkdir, new_filename) < 0) {
+    if (asprintf(&link, "%s/%s_XXXXXX", CLIENT_TORRENTS, new_filename) < 0) {
         fprintf(stderr, "asprintf failed :: %s\n", strerror(errno));
         return -1;
     }
@@ -140,6 +139,16 @@ static int create_symlink(const char *__restrict__ _linkdir,
     return 0;
 }
 
+// Global configuration variables;
+const char *CLIENT_IP;
+unsigned CLIENT_PORT;
+const char *CLIENT_LOG_DIR;
+const char *CLIENT_TORRENTS;
+const char *CLIENT_DOWNLOAD;
+
+const char *CSERVER_IP;
+unsigned CSERVER_PORT;
+
 int main(int argc, char **argv)
 {
     if (argc == 1) {
@@ -148,14 +157,7 @@ int main(int argc, char **argv)
     }
 
     config_t conf;
-    const char *CLIENT_IP;
-    unsigned CLIENT_PORT;
-    const char *CLIENT_LOG_DIR;
-    const char *CLIENT_TORRENTS;
-    const char *CLIENT_DOWNLOAD;
 
-    const char *CSERVER_IP;
-    unsigned CSERVER_PORT;
 
     char *filename = argv[1];
     int err = 0;
@@ -226,7 +228,7 @@ int main(int argc, char **argv)
             err = -1; goto clean;
         }
 
-        if (create_symlink(CLIENT_TORRENTS, filename, leecher->fileinfo->file_name) < 0) {
+        if (create_symlink(filename, leecher->fileinfo->file_name) < 0) {
             err = -1; goto clean;
         }
     
@@ -259,7 +261,7 @@ int main(int argc, char **argv)
 
     printf("IP: %s\nPORT: %d\n", inet_ntoa(seeder->addr.sin_addr), ntohs(seeder->addr.sin_port));
 
-    sendfile(CLIENT_TORRENTS, NULL, leecher);
+    sendfile(NULL, leecher);
 
 clean:
     config_destroy(&conf);

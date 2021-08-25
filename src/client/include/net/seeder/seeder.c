@@ -1,5 +1,6 @@
 #include "seeder.h"
 #include "../../../../include/logging/logging.h"
+#include "../../../include/config/config.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,18 +13,18 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
-static char* find_file(const char *__restrict__ _linkdir, struct file_info *fileinfo)
+static char* find_file(struct file_info *fileinfo)
 {
-    struct DIR *d;
+    DIR *d;
     struct dirent *dir;
 
-    if (!(d = opendir(_linkdir))) {
-        LOG_ERROR("Could not open %s directory :: %s\n", _linkdir, strerror(errno));
+    if (!(d = opendir(CLIENT_TORRENTS))) {
+        LOG_ERROR("Could not open %s directory :: %s\n", CLIENT_TORRENTS, strerror(errno));
         return NULL;
     }
 
     if (!(dir = readdir(d))) {
-        LOG_ERROR("Could not read %s directory entries :: %s\n", _linkdir, strerror(errno));
+        LOG_ERROR("Could not read %s directory entries :: %s\n", CLIENT_TORRENTS, strerror(errno));
         return NULL;
     }
 
@@ -38,7 +39,7 @@ static char* find_file(const char *__restrict__ _linkdir, struct file_info *file
     return NULL;
 }
 
-int sendfile(const char *__restrict__ _linkdir, struct Node *dst, struct Node *src)
+int sendfile(struct Node *dst, struct Node *src)
 {
     // if (!dst || !src) return -1;
 
@@ -56,6 +57,6 @@ int sendfile(const char *__restrict__ _linkdir, struct Node *dst, struct Node *s
 */
     // if (send(sock, ) < 0)
 
-    find_file(_linkdir, src->fileinfo);
+    find_file(src->fileinfo);
     return 0;
 }
