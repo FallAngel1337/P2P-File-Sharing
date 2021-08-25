@@ -33,6 +33,8 @@ struct Node* node_create(const char *__restrict__ ip, uint32_t port)
 
 int node_destroy(struct Node *node)
 {
+    if (!node) return -1;
+    
     free((char*)node->fileinfo->file_name);
     free(node->fileinfo);
     free(node);
