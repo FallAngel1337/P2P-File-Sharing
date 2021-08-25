@@ -12,6 +12,10 @@
  * Also serve the file for downloading.
 */
 
+#ifndef _GNU_SOURCE
+#   define _GNU_SOURCE
+#endif
+
 // Global headers
 #include "../include/node/node.h"
 #include "../include/node/serr/node_serr.h"
@@ -25,7 +29,11 @@
 #include <time.h>
 #include <string.h>
 #include <libconfig.h>
+#include <unistd.h>
 #include <stdbool.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 #include <arpa/inet.h>
 
@@ -52,6 +60,11 @@ static inline uint16_t use_random_port()
     return random() % 65536;
 }
 
+static inline bool is_relative_path(const char *__restrict__ _path)
+{
+    return (*_path == '/') ? false : true;
+}
+
 int main(int argc, char **argv)
 {
     if (argc == 1) {
@@ -63,6 +76,8 @@ int main(int argc, char **argv)
     const char *CLIENT_IP;
     unsigned CLIENT_PORT;
     const char *CLIENT_LOG_DIR;
+    const char *CLIENT_TORRENTS;
+    const char *CLIENT_DOWNLOAD;
 
     const char *CSERVER_IP;
     unsigned CSERVER_PORT;
@@ -79,6 +94,9 @@ int main(int argc, char **argv)
     config_lookup_string(&conf, "CLIENT_IP", &CLIENT_IP);
     config_lookup_int(&conf, "CLIENT_PORT", &CLIENT_PORT);
     config_lookup_string(&conf, "CLIENT_LOG_DIR", &CLIENT_LOG_DIR);
+
+    config_lookup_string(&conf, "CLIENT_TORRENTS", &CLIENT_TORRENTS);
+    config_lookup_string(&conf, "CLIENT_DOWNLOAD", &CLIENT_DOWNLOAD);
     
     config_lookup_string(&conf, "CSERVER_IP", &CSERVER_IP);
     config_lookup_int(&conf, "CSERVER_PORT", &CSERVER_PORT);
@@ -91,10 +109,28 @@ int main(int argc, char **argv)
         PORT = config_lookup(&conf, "CLIENT_PORT");
         config_setting_set_int(PORT, CLIENT_PORT);
         config_write_file(&conf, CLIENT_CONFIG_FILE);
-        printf("Writed %u to config file: %s\n", CLIENT_PORT, CLIENT_CONFIG_FILE);
+        printf("Successfully writed %u to config file: %s\n", CLIENT_PORT, CLIENT_CONFIG_FILE);
     }
 
-    struct Node *leecher = node_create(CLIENT_IP, CLIENT_PORT), *seeder;
+    if (!strcmp(CLIENT_DOWNLOAD, "")) {
+        printf("Would you like to set a default download directory? [y/n] ");
+        char op = 0;
+        scanf("\n%c", &op);
+
+        if (op == 'y') {
+            char download[255];
+            printf(">> ");
+            scanf("\n%s", download);
+
+            config_setting_t *DOWNLOAD;
+            DOWNLOAD = config_lookup(&conf, "CLIENT_DOWNLOAD");
+            config_setting_set_string(DOWNLOAD, download);
+            config_write_file(&conf, CLIENT_CONFIG_FILE);
+            printf("Successfully writed %s to %s\n", download, CLIENT_CONFIG_FILE);
+        }
+    }
+
+    struct Node *leecher = node_create(CLIENT_IP, CLIENT_PORT), *seeder = NULL;
     char *json = NULL;
 
     if (is_a_torrent(filename)) {
@@ -112,7 +148,7 @@ int main(int argc, char **argv)
             fprintf(stderr, "Could not load the file %s\n", filename);
             err = -1; goto clean;
         }
-
+    
         if (jsonWriteFile(&filename, leecher, 0) < 0) {
             fprintf(stderr, "Could not create the torrent\n");
             err = -1; goto clean;
