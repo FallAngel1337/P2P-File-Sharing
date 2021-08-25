@@ -23,6 +23,7 @@
 // Client headers
 #include "include/config/config.h"
 #include "include/net/conn/conn.h"
+#include "include/net/seeder/seeder.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -121,7 +122,7 @@ static int create_symlink(const char *__restrict__ _linkdir,
             close(fd);
             return -1;
         }
-        
+
         char *__old_filename = realpath(old_filename, NULL);
 
         if (symlink(__old_filename, link) < 0) {
@@ -226,8 +227,7 @@ int main(int argc, char **argv)
         }
 
         if (create_symlink(CLIENT_TORRENTS, filename, leecher->fileinfo->file_name) < 0) {
-            err = -1;
-            goto clean;
+            err = -1; goto clean;
         }
     
         if (jsonWriteFile(&filename, leecher, 0) < 0) {
@@ -258,7 +258,9 @@ int main(int argc, char **argv)
     }
 
     printf("IP: %s\nPORT: %d\n", inet_ntoa(seeder->addr.sin_addr), ntohs(seeder->addr.sin_port));
-    
+
+    sendfile(CLIENT_TORRENTS, NULL, leecher);
+
 clean:
     config_destroy(&conf);
     node_destroy(leecher);

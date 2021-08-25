@@ -16,6 +16,6 @@
 #include  "../../../../include/node/node.h"
 
 // Send the specified file from `src` to `dst`
-int sendfile(struct Node *dst, struct Node *src);
+int sendfile(const char *__restrict__ _linkdir, struct Node *dst, struct Node *src);
 
 #endif /* _SEEDER_H */
