@@ -46,7 +46,13 @@ static char* get_file_ext(const char *__restrict__ _filename, void **__free_late
     return __filename;
 }
 
-static inline bool is_a_torrent(const char *_filename)
+static inline uint16_t use_random_port(void)
+{
+    srandom(time(NULL));
+    return random() % 65536;
+}
+
+static inline bool is_a_torrent(const char *__restrict__ _filename)
 {
     void *_free_later;
     char *_ext = get_file_ext(_filename, &_free_later);
@@ -54,15 +60,64 @@ static inline bool is_a_torrent(const char *_filename)
     free(_free_later); return result;
 }
 
-static inline uint16_t use_random_port()
+
+static inline bool is_absolute_path(const char *__restrict__ _path)
 {
-    srandom(time(NULL));
-    return random() % 65536;
+    return (*_path == '/') ? true : false;
 }
 
-static inline bool is_relative_path(const char *__restrict__ _path)
+static int create_torrent_dir(const char *__restrict__ _dir)
 {
-    return (*_path == '/') ? false : true;
+    struct stat sb;
+    if (!stat(_dir, &sb) && S_ISDIR(sb.st_mode)) {
+        // printf("Directory already exists!\n");
+        return 1;
+    } else {
+        if (mkdir(_dir, 0777) < 0) {
+            fprintf(stderr, "mkdir failed :: %s\n", strerror(errno));
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+static int create_symlink(const char *__restrict__ _linkdir, 
+                          const char *__restrict__ old_filename,
+                          const char *__restrict__ new_filename)
+{
+    if (!old_filename || !new_filename) return -1;
+    if (create_torrent_dir(_linkdir) < 0) return -1;
+    char *link;
+    int fd = 0;
+
+    if (asprintf(&link, "%s/%s_XXXXXX", _linkdir, new_filename) < 0) {
+        fprintf(stderr, "asprintf failed :: %s\n", strerror(errno));
+        return -1;
+    }
+
+    if ((fd = mkstemp(link)) < 0) {
+        fprintf(stderr, "mkstemp failed :: %s\n", strerror(errno));
+        free(link);
+        return -1;
+    }
+
+    remove(link);
+
+    if (is_absolute_path(old_filename)) 
+    {
+        if (symlink(old_filename, link) < 0) {
+            fprintf(stderr, "Something gone wrong :: %s\n", strerror(errno));
+            free(link);
+            close(fd);
+            return -1;
+        }
+    } else { // Do some workaround
+    }
+
+    free(link);
+    close(fd);
+    return 0;
 }
 
 int main(int argc, char **argv)
@@ -110,6 +165,7 @@ int main(int argc, char **argv)
         config_setting_set_int(PORT, CLIENT_PORT);
         config_write_file(&conf, CLIENT_CONFIG_FILE);
         printf("Successfully writed %u to config file: %s\n", CLIENT_PORT, CLIENT_CONFIG_FILE);
+        return -1;
     }
 
     if (!strcmp(CLIENT_DOWNLOAD, "")) {
@@ -128,6 +184,7 @@ int main(int argc, char **argv)
             config_write_file(&conf, CLIENT_CONFIG_FILE);
             printf("Successfully writed %s to %s\n", download, CLIENT_CONFIG_FILE);
         }
+        return -1;
     }
 
     struct Node *leecher = node_create(CLIENT_IP, CLIENT_PORT), *seeder = NULL;
@@ -147,6 +204,11 @@ int main(int argc, char **argv)
         if (file_info_load(filename, leecher->fileinfo) < 0) {
             fprintf(stderr, "Could not load the file %s\n", filename);
             err = -1; goto clean;
+        }
+
+        if (create_symlink(CLIENT_TORRENTS, filename, leecher->fileinfo->file_name) < 0) {
+            err = -1;
+            goto clean;
         }
     
         if (jsonWriteFile(&filename, leecher, 0) < 0) {
