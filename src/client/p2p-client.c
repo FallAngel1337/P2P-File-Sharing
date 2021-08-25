@@ -94,33 +94,33 @@ int main(int argc, char **argv)
         printf("Writed %u to config file: %s\n", CLIENT_PORT, CLIENT_CONFIG_FILE);
     }
 
-    struct Node *node = node_create(CLIENT_IP, CLIENT_PORT), *seeder;
+    struct Node *leecher = node_create(CLIENT_IP, CLIENT_PORT), *seeder;
     char *json = NULL;
 
     if (is_a_torrent(filename)) {
-        if (jsonReadFile(filename, node, 0) < 0) {
+        if (jsonReadFile(filename, leecher, 0) < 0) {
             fprintf(stderr, "Could not load the json file_info content of the file %s\n", filename);
             err = -1; goto clean;
         }
 
-        if (!(json = nodeSerialize(node, SERR_NET))) {
+        if (!(json = nodeSerialize(leecher, SERR_NET))) {
             fprintf(stderr, "Could not load the json addr info content of the file %s\n", filename);
             err = -1; goto clean;
         }
     } else {
-        if (file_info_load(filename, node->fileinfo) < 0) {
+        if (file_info_load(filename, leecher->fileinfo) < 0) {
             fprintf(stderr, "Could not load the file %s\n", filename);
             err = -1; goto clean;
         }
 
-        if (jsonWriteFile(&filename, node, 0) < 0) {
+        if (jsonWriteFile(&filename, leecher, 0) < 0) {
             fprintf(stderr, "Could not create the torrent\n");
             err = -1; goto clean;
         }
 
         printf("Created %s successfully!\n", filename);
 
-        if (!(json = nodeSerialize(node, SERR_NET))) {
+        if (!(json = nodeSerialize(leecher, SERR_NET))) {
             fprintf(stderr, "Was not possible to deserialize the node!\n");
             free(filename);
             err = -1; goto clean;
@@ -144,7 +144,7 @@ int main(int argc, char **argv)
     
 clean:
     config_destroy(&conf);
-    node_destroy(node);
+    node_destroy(leecher);
     node_destroy(seeder);
     free(json);       
     return err;
