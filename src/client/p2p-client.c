@@ -34,6 +34,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <limits.h>
 
 #include <arpa/inet.h>
 
@@ -112,7 +113,25 @@ static int create_symlink(const char *__restrict__ _linkdir,
             close(fd);
             return -1;
         }
-    } else { // Do some workaround
+    } else {
+        char cwd[FILENAME_MAX];
+        if (!getcwd(cwd, sizeof(cwd))) {
+            fprintf(stderr, "Could not get the current work directory :: %s\n", strerror(errno));
+            free(link);
+            close(fd);
+            return -1;
+        }
+        
+        char *__old_filename = realpath(old_filename, NULL);
+
+        if (symlink(__old_filename, link) < 0) {
+            fprintf(stderr, "Something gone wrong :: %s\n", strerror(errno));
+            free(link);
+            free(__old_filename);
+            close(fd);
+            return -1;
+        }
+        free(__old_filename);
     }
 
     free(link);
