@@ -208,9 +208,10 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    struct Node *leecher = node_create("0.0.0.0", 0);
-    struct Node *seeder = node_create(CLIENT_IP, CLIENT_PORT);
+    struct Node *seeder = node_create(CLIENT_IP, CLIENT_PORT); // our client seeder
+    struct Node *cserver = node_create(CSERVER_IP, CSERVER_PORT); // centrar server node
     char *json = NULL;
+
     if (!strcmp(argv[1], "--start")) {
         seeder_start(seeder);
         return 0;
@@ -253,7 +254,7 @@ int main(int argc, char **argv)
     }
 
 
-    int nodefd = connectton(CSERVER_IP, CSERVER_PORT, json, strlen(json)+1);
+    int nodefd = connectton(cserver, json, strlen(json)+1);
     char buf[512];
     if (recvfromn(nodefd, buf, 512)) {
         err = -1; goto clean;
@@ -267,18 +268,17 @@ int main(int argc, char **argv)
 
     close(nodefd);
     
-    nodefd = connectton(inet_ntoa(seeder->addr.sin_addr), ntohs(seeder->addr.sin_port), json, strlen(json)+1);
+    nodefd = connectton(seeder, json, strlen(json)+1);
     char data[1024];
     if (recvfromn(nodefd, data, sizeof(data))) {
         err = -1; goto clean;
     }
-    printf("data: %s\n", data);
 
 clean:
     close(nodefd);
     config_destroy(&conf);
-    node_destroy(leecher);
     node_destroy(seeder);
+    node_destroy(cserver);
     free(json);       
     return err;
 }

@@ -14,13 +14,14 @@
 #ifndef _CONNECTION_H
 #define _CONNECTION_H
 
+#include <node/node.h>
+
 #include <sys/types.h>
 #include <stdint.h>
 #include <netinet/in.h>
 
-// Connect to a node(could be the server too) and send `n` bytes of `buf`.
-int connectton(const char *__restrict__ ip, uint32_t port, 
-               const void *__restrict__ _buf, size_t _n);
+// Connect to a node and send `n` bytes of `buf`.
+int connectton(struct Node *_node, const void *__restrict__ _buf, size_t _n);
 
 // Recieve from a node and write the reponse in `n` bytes of `_buf`
 int recvfromn(int _fd, void *__restrict__ _buf, size_t _n);

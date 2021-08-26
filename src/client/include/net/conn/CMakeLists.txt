@@ -3,3 +3,5 @@ add_library(
     conn.c
     conn.h
 )
+
+target_include_directories(connection PUBLIC ../../../../include/ ../../../include/)
