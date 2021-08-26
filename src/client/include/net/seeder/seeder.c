@@ -39,9 +39,9 @@ static char* find_file(struct file_info *fileinfo)
     return buf;
 }
 
-int sendfile(struct Node *dst, struct Node *src)
+int sendfile(int _fd, struct Node *src)
 {
-    if (!dst || !src) return -1;
+    if (_fd <= 0|| !src) return -1;
 
     int sock = 0, fd = 0;
     int err = 0;
@@ -68,16 +68,10 @@ int sendfile(struct Node *dst, struct Node *src)
         err = -1; goto clean;
     }
 
-/*
-    if (connect(sock, (struct sockaddr*)&dst->addr, sizeof(dst->addr)) < 0) {
-        LOG_ERROR("Failed to connect to dst node: %s\n", strerror(errno));
+    if (send(_fd, data, src->fileinfo->file_size, 0) < 0) {
+        LOG_ERROR("Failed to send file %s :: %s\n", file, strerror(errno));
         err = -1; goto clean;
     }
-
-    if (send(sock, data, src->fileinfo->file_size, 0) < 0) {
-        LOG_ERROR("Failed to send the data :: %s\n", strerror(errno));
-    }
-*/
 
 clean:
     free(file);
