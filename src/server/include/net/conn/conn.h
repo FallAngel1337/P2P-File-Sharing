@@ -16,9 +16,9 @@
 #include <netinet/in.h>
 
 // Recieve the json from client and deserialize
-int recvfromc(int _fd, struct Node *_node);
+int recvfromc(int _fd, struct Node **_node, uint8_t _flags);
 
-// Send to client the address of the file owner
-int sendtoc(int _fd, struct sockaddr_in *_addr);
+// Send to client the address of the seeder
+int sendtoc(int _fd, struct Node *_seeder);
 
 #endif /* _CONNECTION_H */

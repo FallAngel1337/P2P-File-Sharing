@@ -11,7 +11,7 @@
 #include <arpa/inet.h>
 
 // Recieve the json from client and deserialize
-int recvfromc(int _fd, struct Node *_node)
+int recvfromc(int _fd, struct Node **_node, uint8_t _flags)
 {
     char *_buf = calloc(1, 512);
 
@@ -25,7 +25,7 @@ int recvfromc(int _fd, struct Node *_node)
     printf("%s\n", _buf);
 #endif
 
-    if (!nodeDeserialize(_buf, _node, 0)) {
+    if (!(*_node = nodeDeserialize(_buf, *_node, _flags))) {
         fprintf(stderr, "recvfromc failed to deserialize\n");
         close(_fd); free(_buf);
         return -1;
@@ -35,8 +35,21 @@ int recvfromc(int _fd, struct Node *_node)
     return 0;
 }
 
-// Send to client the address of the file owner
-int sendtoc(int _fd, struct sockaddr_in *_addr)
+// Send to client the address of seeder
+int sendtoc(int _fd, struct Node *_seeder)
 {
+    char *nodeserr;
+    struct Node *_nullnode = node_create("127.0.0.1", 0);
 
+    if (!_seeder) {
+        fprintf(stderr, "Was not possible to find the node!\n");
+        nodeserr = nodeSerialize(_nullnode, 0);
+    } else {
+        nodeserr = nodeSerialize(_seeder, SERR_NET);
+    }
+
+    if (send(_fd, nodeserr, strlen(nodeserr)+1, 0) < 0) return -1;
+
+    node_destroy(_nullnode);
+    return 0;
 }

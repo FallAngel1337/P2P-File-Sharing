@@ -54,7 +54,7 @@ int main(int argc, char **argv)
     struct rtable **table = table_create(RTABLE_SIZE);
     struct sockaddr_in addr;
     socklen_t len = sizeof(addr);
-    int sock, i=0;
+    int sock;
 
     memset(&addr, 0, len);
 
@@ -91,30 +91,21 @@ int main(int argc, char **argv)
 
     printf("Running at %s:%d\n", CSERVER_IP, CSERVER_PORT);
 
-    // change this logic later, dont forget
-    while (i < RTABLE_SIZE) {
+    while (1) {
         struct sockaddr_in client_addr;
         int connfd = accept(sock, (struct sockaddr*)&client_addr, &len);
-        char *buf = calloc(1, 512);
+        struct Node *client_node = NULL;
 
-        if (recv(connfd, buf, 512, 0) < 0) {
-            fprintf(stderr, "recv failed %s\n", strerror(errno));
+        if (recvfromc(connfd, &client_node, SERR_NET) < 0) {
+            fprintf(stderr, "recvfromc failed %s\n", strerror(errno));
             close(connfd);
             break;
         }
 
-        struct Node *client_node = nodeDeserialize(buf, NULL, SERR_NET);
         char *nodeserr;
 
-        struct Node *lookup_node = table_lookup(table, client_node->fileinfo, RTABLE_SIZE);
-        if (!lookup_node) {
-            fprintf(stderr, "Was not possible to find the node!\n");
-            nodeserr = nodeSerialize(client_node, 0);
-        } else {
-            nodeserr = nodeSerialize(lookup_node, SERR_NET);
-        }
-
-        if (send(connfd, nodeserr, strlen(nodeserr)+1, 0) < 0) {
+        struct Node *seeder_addr = table_lookup(table, client_node->fileinfo, RTABLE_SIZE);
+        if (sendtoc(connfd, seeder_addr) < 0) {
             fprintf(stderr, "Was not possible to send json! error: %s\n", strerror(errno));
             break;
         }
@@ -125,11 +116,7 @@ int main(int argc, char **argv)
         }
 
         show_table(table, RTABLE_SIZE);
-
-        free(buf);
     }
-
-    printf("LIST IS FULL\n");
 
     config_destroy(&conf);
     free(table);
