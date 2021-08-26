@@ -21,7 +21,7 @@
 #include "../include/node/serr/node_serr.h"
 
 // Client headers
-#include "include/config/config.h"
+#include "include/config/client/config.h"
 #include "include/net/conn/conn.h"
 #include "include/net/seeder/seeder.h"
 

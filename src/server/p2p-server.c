@@ -15,7 +15,7 @@
 #include "../include/node/serr/node_serr.h"
 
 // Server headers
-#include "include/config/config.h"
+#include "include/config/server/config.h"
 #include "include/net/rtable/rtable.h"
 #include "include/net/conn/conn.h"
 
