@@ -264,6 +264,10 @@ int main(int argc, char **argv)
         err = -1; goto clean;
     }
 
+    if (seeder->addr.sin_port == 0) {
+        err = -1; goto clean;
+    }
+
     printf("IP: %s\nPORT: %d\n", inet_ntoa(seeder->addr.sin_addr), ntohs(seeder->addr.sin_port));
 
     close(nodefd);
