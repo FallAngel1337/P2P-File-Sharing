@@ -114,14 +114,6 @@ static int create_symlink(const char *__restrict__ old_filename,
             return -1;
         }
     } else {
-        char cwd[FILENAME_MAX];
-        if (!getcwd(cwd, sizeof(cwd))) {
-            fprintf(stderr, "Could not get the current work directory :: %s\n", strerror(errno));
-            free(link);
-            close(fd);
-            return -1;
-        }
-
         char *__old_filename = realpath(old_filename, NULL);
 
         if (symlink(__old_filename, link) < 0) {
@@ -136,6 +128,29 @@ static int create_symlink(const char *__restrict__ old_filename,
 
     free(link);
     close(fd);
+    return 0;
+}
+
+static int savefile(const char *__restrict__ _filename, const char *_content, size_t _n)
+{
+    char *savefileto;
+    int fd = 0;
+    asprintf(&savefileto, "%s/%s", CLIENT_DOWNLOAD, _filename);
+
+    if ((fd = open(savefileto, O_WRONLY|O_CREAT|O_TRUNC|O_EXCL, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH|S_IROTH)) < 0) {
+        fprintf(stderr, "Could not save the file to \"%s\" :: %s\n", _filename, strerror(errno));
+        free(savefileto);
+        return -1;
+    }
+
+    if (write(fd, _content, _n) < 0) {
+        fprintf(stderr, "Could not write to \"%s\" :: %s\n", _filename, strerror(errno));
+        free(savefileto);
+        return -1;
+    }
+
+    printf("Saved the file at: %s\n", _filename);
+    free(savefileto);
     return 0;
 }
 
@@ -186,6 +201,7 @@ int main(int argc, char **argv)
         config_setting_set_int(PORT, CLIENT_PORT);
         config_write_file(&conf, CLIENT_CONFIG_FILE);
         printf("Successfully writed %u to config file: %s\n", CLIENT_PORT, CLIENT_CONFIG_FILE);
+        printf("Please run it again to apply the changes!\n");
         return -1;
     }
 
@@ -204,11 +220,28 @@ int main(int argc, char **argv)
             config_setting_set_string(DOWNLOAD, download);
             config_write_file(&conf, CLIENT_CONFIG_FILE);
             printf("Successfully writed %s to %s\n", download, CLIENT_CONFIG_FILE);
+            printf("Please run it again to apply the changes!\n");
+        } else {
+            printf("Using current working directory as default!\n");
+            
+            char cwd[FILENAME_MAX];
+            if (!getcwd(cwd, sizeof(cwd))) {
+                fprintf(stderr, "Could not get the current work directory :: %s\n", strerror(errno));
+                return -1;
+            }
+
+            config_setting_t *DOWNLOAD;
+            DOWNLOAD = config_lookup(&conf, "CLIENT_DOWNLOAD");
+            CLIENT_DOWNLOAD = getcwd(cwd, FILENAME_MAX);
+            
+            config_setting_set_string(DOWNLOAD, CLIENT_DOWNLOAD);
+            config_write_file(&conf, CLIENT_CONFIG_FILE);
+            printf("Using default: %s\n", CLIENT_DOWNLOAD);
         }
         return -1;
     }
 
-    struct Node *seeder = node_create(CLIENT_IP, CLIENT_PORT); // our client seeder
+    struct Node *seeder = node_create(CLIENT_IP, CLIENT_PORT); // our client seeder, but can be other seeder on the network
     struct Node *cserver = node_create(CSERVER_IP, CSERVER_PORT); // centrar server node
     char *json = NULL;
 
@@ -277,6 +310,8 @@ int main(int argc, char **argv)
     if (recvfromn(nodefd, data, sizeof(data))) {
         err = -1; goto clean;
     }
+
+    savefile(seeder->fileinfo->file_name, data, 1024);
 
 clean:
     close(nodefd);
