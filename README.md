@@ -15,7 +15,7 @@ The project stills under development, so if something is missing or its bad, don
 - [X] Create the listen client daemon to send the requested file
 - [ ] Make the seeder multi-client
 - [X] Use the download folder
-- [ ] Do soem code refactoring (readability)
+- [ ] Do some code refactoring (readability)
 - [ ] Use protobuf instead of JSON?
 
 ## How it works?
