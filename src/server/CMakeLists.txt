@@ -10,6 +10,7 @@ add_subdirectory(../include/logging logs)
 add_subdirectory(../include/file_info file_info)
 add_executable(P2P-Server p2p-server.c)
 
+target_include_directories(P2P-Server PUBLIC ../include/ include/)
 target_link_libraries(P2P-Server PUBLIC 
                       file_info 
                       node

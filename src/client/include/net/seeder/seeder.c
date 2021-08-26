@@ -1,6 +1,6 @@
 #include "seeder.h"
 #include <logging/logging.h>
-#include "../../../include/config/config.h"
+#include <config/client/config.h>
 
 #include <stdio.h>
 #include <stdlib.h>

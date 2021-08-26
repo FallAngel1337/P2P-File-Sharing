@@ -9,8 +9,8 @@
 #ifndef _RTABLE_H
 #define _RTABLE_H
 
-#include "../../../../include/node/node.h"
-#include "../../../../include/node/serr/node_serr.h"
+#include <node/node.h>
+#include <node/serr/node_serr.h>
 
 struct rtable;
 

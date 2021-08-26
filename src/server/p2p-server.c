@@ -11,13 +11,13 @@
 */
 
 // Global headers
-#include "../include/node/node.h"
-#include "../include/node/serr/node_serr.h"
+#include <node/node.h>
+#include <node/serr/node_serr.h>
 
 // Server headers
-#include "include/config/server/config.h"
-#include "include/net/rtable/rtable.h"
-#include "include/net/conn/conn.h"
+#include <config/server/config.h>
+#include <net/rtable/rtable.h>
+#include <net/conn/conn.h>
 
 #include <stdio.h>
 #include <string.h>

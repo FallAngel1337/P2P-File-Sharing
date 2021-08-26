@@ -4,4 +4,5 @@ add_library(
     conn.h
 )
 
+target_include_directories(connection PUBLIC ../../../../include/ ../../../include/)
 target_link_libraries(connection node_serr)

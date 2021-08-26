@@ -17,13 +17,13 @@
 #endif
 
 // Global headers
-#include "../include/node/node.h"
-#include "../include/node/serr/node_serr.h"
+#include <node/node.h>
+#include <node/serr/node_serr.h>
 
 // Client headers
-#include "include/config/client/config.h"
-#include "include/net/conn/conn.h"
-#include "include/net/seeder/seeder.h"
+#include <config/client/config.h>
+#include <net/conn/conn.h>
+#include <net/seeder/seeder.h>
 
 #include <stdio.h>
 #include <stdlib.h>

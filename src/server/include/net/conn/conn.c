@@ -1,4 +1,4 @@
-#include "../../../../include/node/serr/node_serr.h"
+#include <node/serr/node_serr.h>
 #include "conn.h"
 
 #include <stdio.h>
