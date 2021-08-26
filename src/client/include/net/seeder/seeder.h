@@ -18,4 +18,7 @@
 // Send the specified file from `src` to the socket `fd`
 int sendfile(int _fd, struct Node *src);
 
+// Start the seeder service
+int seeder_start();
+
 #endif /* _SEEDER_H */

@@ -158,7 +158,6 @@ int main(int argc, char **argv)
 
     config_t conf;
 
-
     char *filename = argv[1];
     int err = 0;
     config_init(&conf);
@@ -212,6 +211,10 @@ int main(int argc, char **argv)
     struct Node *leecher = node_create("0.0.0.0", 0);
     struct Node *seeder = node_create(CLIENT_IP, CLIENT_PORT);
     char *json = NULL;
+    if (!strcmp(argv[1], "--start")) {
+        seeder_start(seeder);
+        return 0;
+    }
 
     if (is_a_torrent(filename)) {
         if (jsonReadFile(filename, seeder, 0) < 0) {
@@ -262,7 +265,17 @@ int main(int argc, char **argv)
 
     printf("IP: %s\nPORT: %d\n", inet_ntoa(seeder->addr.sin_addr), ntohs(seeder->addr.sin_port));
 
+    close(nodefd);
+    
+    nodefd = connectton(inet_ntoa(seeder->addr.sin_addr), ntohs(seeder->addr.sin_port), json, strlen(json)+1);
+    char data[1024];
+    if (recvfromn(nodefd, data, sizeof(data))) {
+        err = -1; goto clean;
+    }
+    printf("data: %s\n", data);
+
 clean:
+    close(nodefd);
     config_destroy(&conf);
     node_destroy(leecher);
     node_destroy(seeder);
