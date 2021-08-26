@@ -13,7 +13,7 @@
 #ifndef _SEEDER_H
 #define _SEEDER_H
 
-#include  "../../../../include/node/node.h"
+#include  <node/node.h>
 
 // Send the specified file from `src` to the socket `fd`
 int sendfile(int _fd, struct Node *src);

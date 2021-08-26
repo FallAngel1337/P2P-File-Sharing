@@ -1,5 +1,5 @@
 #include "seeder.h"
-#include "../../../../include/logging/logging.h"
+#include <logging/logging.h>
 #include "../../../include/config/config.h"
 
 #include <stdio.h>
