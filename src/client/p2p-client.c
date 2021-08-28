@@ -194,6 +194,7 @@ static void __attribute__((noreturn)) help(char *__restrict__ __progname)
     printf("\nExample:\n");
     printf("\t%s loveletter.txt\n", __progname);
     printf("\t%s /home/john/loveletter.txt\n", __progname);
+    printf("\t%s /home/john/loveletter.txt --clientIP \"127.0.0.1\"\n", __progname);
 
     exit(EXIT_FAILURE);
 }
@@ -237,54 +238,54 @@ int main(int argc, char **argv)
         printf("Successfully writed %u to config file: %s\n", CLIENT_PORT, CLIENT_CONFIG_FILE);
         printf("Please run it again to apply the changes!\n");
         return -1;
-    }
 
-    if (!strcmp(CLIENT_DOWNLOAD, "")) {
-        printf("Would you like to set a default download directory? [y/n] ");
-        char op = 0;
-        scanf("\n%c", &op);
+        if (!strcmp(CLIENT_DOWNLOAD, "")) {
+            printf("Would you like to set a default download directory? [y/n] ");
+            char op = 0;
+            scanf("\n%c", &op);
 
-        if (op == 'y') {
-            char download[255];
-            printf(">> ");
-            scanf("\n%s", download);
+            if (op == 'y') {
+                char download[255];
+                printf(">> ");
+                scanf("\n%s", download);
 
-            config_setting_t *DOWNLOAD;
-            DOWNLOAD = config_lookup(&conf, "CLIENT_DOWNLOAD");
-            config_setting_set_string(DOWNLOAD, download);
-            config_write_file(&conf, CLIENT_CONFIG_FILE);
-            printf("Successfully writed %s to %s\n", download, CLIENT_CONFIG_FILE);
-            printf("Please run it again to apply the changes!\n");
-            config_destroy(&conf);
-        } else {
-            printf("Using current working directory as default!\n");
-            
-            char cwd[FILENAME_MAX];
-            if (!getcwd(cwd, sizeof(cwd))) {
-                fprintf(stderr, "Could not get the current work directory :: %s\n", strerror(errno));
-                return -1;
+                config_setting_t *DOWNLOAD;
+                DOWNLOAD = config_lookup(&conf, "CLIENT_DOWNLOAD");
+                config_setting_set_string(DOWNLOAD, download);
+                config_write_file(&conf, CLIENT_CONFIG_FILE);
+                printf("Successfully writed %s to %s\n", download, CLIENT_CONFIG_FILE);
+                printf("Please run it again to apply the changes!\n");
+                config_destroy(&conf);
+            } else {
+                printf("Using current working directory as default!\n");
+                
+                char cwd[FILENAME_MAX];
+                if (!getcwd(cwd, sizeof(cwd))) {
+                    fprintf(stderr, "Could not get the current work directory :: %s\n", strerror(errno));
+                    return -1;
+                }
+
+                config_setting_t *DOWNLOAD;
+                DOWNLOAD = config_lookup(&conf, "CLIENT_DOWNLOAD");
+                CLIENT_DOWNLOAD = getcwd(cwd, FILENAME_MAX);
+                
+                config_setting_set_string(DOWNLOAD, CLIENT_DOWNLOAD);
+                config_write_file(&conf, CLIENT_CONFIG_FILE);
+                printf("Using default: %s\n", CLIENT_DOWNLOAD);
             }
-
-            config_setting_t *DOWNLOAD;
-            DOWNLOAD = config_lookup(&conf, "CLIENT_DOWNLOAD");
-            CLIENT_DOWNLOAD = getcwd(cwd, FILENAME_MAX);
-            
-            config_setting_set_string(DOWNLOAD, CLIENT_DOWNLOAD);
-            config_write_file(&conf, CLIENT_CONFIG_FILE);
-            printf("Using default: %s\n", CLIENT_DOWNLOAD);
+            config_destroy(&conf);
+            return -1;
         }
-        config_destroy(&conf);
-        return -1;
     }
-    
-    config_destroy(&conf);
+
+    printf("Default Configuration:\nClient: %s:%d\nServer: %s:%d\n\n", CLIENT_IP, CLIENT_PORT, CSERVER_IP, CSERVER_PORT);
 
     int c = 1;
     int index = 0;
 
     while (c) 
     {
-        c = getopt_long (argc, argv, "a:b:c:d:e:f:g:h", long_options, &index);
+        c = getopt_long(argc, argv, "a:b:c:d:e:f:g:h", long_options, &index);
 
         if (c == -1) break;
 
@@ -292,22 +293,22 @@ int main(int argc, char **argv)
             case 0:
                 break;
             case 'a':
-               CLIENT_IP = (const char*)optarg;
+               CLIENT_IP = strdup((const char*)optarg);
                break;
             case 'b':
                 CLIENT_PORT = atoi(optarg);
                 break;
             case 'c':
-                CLIENT_LOG_DIR = (const char*)optarg;
+                CLIENT_LOG_DIR = strdup((const char*)optarg);
                 break;
             case 'd':
-                CLIENT_TORRENTS = (const char*)optarg;
+                CLIENT_TORRENTS = strdup((const char*)optarg);
                 break;
             case 'e':
-                CLIENT_DOWNLOAD = (const char*)optarg;
+                CLIENT_DOWNLOAD = strdup((const char*)optarg);
                 break;
             case 'f':
-                CSERVER_IP = (const char*)optarg;
+                CSERVER_IP = strdup((const char*)optarg);
                 break;
             case 'g':
                 CSERVER_PORT = atoi(optarg);
@@ -319,6 +320,7 @@ int main(int argc, char **argv)
         }
     }
 
+    printf("Current Configuration:\nClient: %s:%d\nServer: %s:%d\n", CLIENT_IP, CLIENT_PORT, CSERVER_IP, CSERVER_PORT);
 
     struct Node *seeder = node_create(CLIENT_IP, CLIENT_PORT);    // our client seeder, but can be other seeder on the network
     struct Node *cserver = node_create(CSERVER_IP, CSERVER_PORT); // centrar server node
@@ -395,6 +397,15 @@ clean:
     close(nodefd);
     node_destroy(seeder);
     node_destroy(cserver);
-    free(json);       
+    free(json);
+    config_destroy(&conf);
+
+    // free((char*)CLIENT_IP);
+    // free((char*)CLIENT_LOG_DIR);
+    // free((char*)CLIENT_TORRENTS);
+    // free((char*)CLIENT_DOWNLOAD);
+
+    // free((char*)CSERVER_IP);
+
     return err;
 }
