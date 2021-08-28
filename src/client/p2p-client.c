@@ -180,7 +180,6 @@ static void __attribute__((noreturn)) help(char *__restrict__ __progname)
     printf("Usage: %s <file> [options] ...\n", __progname);
     printf("\nOPTIONS:\n");
 
-    printf("\t--start\t\tStart the daemon process (NOTE: run before anything)\n");
     printf("\t--clientIP\t\tSet the client IP on which other will connect to\n");
     printf("\t--clientPort\t\tSet the client port on which other will connect to\n");
     printf("\t--clientLogDir\t\tDefine on where the logs will be saved (recommend the defult)\n");
@@ -312,10 +311,6 @@ int main(int argc, char **argv)
     struct Node *cserver = node_create(CSERVER_IP, CSERVER_PORT); // centrar server node
     char *json = NULL;
 
-    if (!strcmp(argv[1], "--start")) {
-        seeder_start(seeder);
-        return 0;
-    }
 
     if (is_a_torrent(filename)) {
         if (jsonReadFile(filename, seeder, 0) < 0) {
@@ -355,6 +350,11 @@ int main(int argc, char **argv)
 
 
     int nodefd = connectton(cserver, json, strlen(json)+1);
+    
+    if (seeder_start(seeder) == 1) {
+        err = 1; goto clean;
+    }
+
     char buf[512];
     if (recvfromn(nodefd, buf, 512)) {
         err = -1; goto clean;
@@ -363,6 +363,7 @@ int main(int argc, char **argv)
     if (!(seeder = nodeDeserialize(buf, NULL, SERR_NET))) {
         err = -1; goto clean;
     }
+
 
     if (seeder->addr.sin_port == 0) {
         err = -1; goto clean;

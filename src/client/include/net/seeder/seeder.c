@@ -172,7 +172,7 @@ int seeder_start(struct Node *seeder)
             break;
         default:
             // _exit(EXIT_SUCCESS);
-            return -1;
+            return 1;
     }
 
     umask(0);
@@ -181,7 +181,7 @@ int seeder_start(struct Node *seeder)
         return -1;
     }
 
-    for (fd=3; fd < sysconf(_SC_OPEN_MAX); fd++) close(fd);
+    for (fd=0; fd < sysconf(_SC_OPEN_MAX); fd++) close(fd);
 
     fd = open("/dev/null", O_RDWR);
     dup2(fd, STDOUT_FILENO);
