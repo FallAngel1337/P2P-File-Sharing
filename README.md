@@ -86,7 +86,7 @@ For now, you need to build both separately.
     $ cd build
     $ cmake ..
     $ make
-    $ ./P2P --help
+    $ ./P2P-Client --help
     ```
 
 - Building the server (not working)
