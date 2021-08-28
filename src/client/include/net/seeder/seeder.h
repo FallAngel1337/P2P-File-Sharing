@@ -19,6 +19,6 @@
 int sendfile(int _fd, struct Node *src);
 
 // Start the seeder service
-int seeder_start();
+int seeder_start(struct Node *_node);
 
 #endif /* _SEEDER_H */

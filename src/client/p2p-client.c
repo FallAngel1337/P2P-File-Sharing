@@ -171,6 +171,7 @@ static struct option long_options[] = {
     {"clientLogDir", required_argument, NULL, 'c'},
     {"clientTorrentDir", required_argument, NULL, 'd'},
     {"clientDownload", required_argument, NULL, 'e'},
+    {"default", no_argument, NULL, 'f'},
     {"help", no_argument, NULL, 'h'},
     {0, 0, 0, 0},
 };
@@ -185,6 +186,7 @@ static void __attribute__((noreturn)) help(char *__restrict__ __progname)
     printf("\t--clientLogDir\t\tDefine on where the logs will be saved (recommend the defult)\n");
     printf("\t--clientTorrentDir\tThe path where the links will be created (recommend the defult)\n");
     printf("\t--clientDownload\tThe path where the downloads will be saved\n");
+    printf("\t--default\t read from the config file\n");
 
     printf("\nExample:\n");
     printf("\t%s loveletter.txt\n", __progname);
@@ -218,60 +220,9 @@ int main(int argc, char **argv)
 
     config_lookup_string(&conf, "CLIENT_TORRENTS", &CLIENT_TORRENTS);
     config_lookup_string(&conf, "CLIENT_DOWNLOAD", &CLIENT_DOWNLOAD);
-    
+
     config_lookup_string(&conf, "CSERVER_IP", &CSERVER_IP);
     config_lookup_int(&conf, "CSERVER_PORT", &CSERVER_PORT);
-
-    if (CLIENT_PORT == 0 || CLIENT_PORT > 65535) 
-    {
-        printf("Invalid PORT value! Using a radomly choosen one ...\n");
-        config_setting_t *PORT;
-        CLIENT_PORT = use_random_port();
-        PORT = config_lookup(&conf, "CLIENT_PORT");
-        config_setting_set_int(PORT, CLIENT_PORT);
-        config_write_file(&conf, CLIENT_CONFIG_FILE);
-        printf("Successfully writed %u to config file: %s\n", CLIENT_PORT, CLIENT_CONFIG_FILE);
-        printf("Please run it again to apply the changes!\n");
-        return -1;
-
-        if (!strcmp(CLIENT_DOWNLOAD, "")) {
-            printf("Would you like to set a default download directory? [y/n] ");
-            char op = 0;
-            scanf("\n%c", &op);
-
-            if (op == 'y') {
-                char download[255];
-                printf(">> ");
-                scanf("\n%s", download);
-
-                config_setting_t *DOWNLOAD;
-                DOWNLOAD = config_lookup(&conf, "CLIENT_DOWNLOAD");
-                config_setting_set_string(DOWNLOAD, download);
-                config_write_file(&conf, CLIENT_CONFIG_FILE);
-                printf("Successfully writed %s to %s\n", download, CLIENT_CONFIG_FILE);
-                printf("Please run it again to apply the changes!\n");
-                config_destroy(&conf);
-            } else {
-                printf("Using current working directory as default!\n");
-                
-                char cwd[FILENAME_MAX];
-                if (!getcwd(cwd, sizeof(cwd))) {
-                    fprintf(stderr, "Could not get the current work directory :: %s\n", strerror(errno));
-                    return -1;
-                }
-
-                config_setting_t *DOWNLOAD;
-                DOWNLOAD = config_lookup(&conf, "CLIENT_DOWNLOAD");
-                CLIENT_DOWNLOAD = getcwd(cwd, FILENAME_MAX);
-                
-                config_setting_set_string(DOWNLOAD, CLIENT_DOWNLOAD);
-                config_write_file(&conf, CLIENT_CONFIG_FILE);
-                printf("Using default: %s\n", CLIENT_DOWNLOAD);
-            }
-            config_destroy(&conf);
-            return -1;
-        }
-    }
 
     int c = 1;
     int index = 0;
@@ -283,34 +234,75 @@ int main(int argc, char **argv)
         if (c == -1) break;
 
         switch (c) {
-            case 0:
+           case 0:
                 break;
             case 'a':
-               CLIENT_IP = strdup((const char*)optarg);
-               break;
+                CLIENT_IP = strdup((const char*)optarg);
+                if (!strcmp(CLIENT_IP, "")) break;
+                config_setting_t *IP = config_lookup(&conf, "CLIENT_IP");
+                config_setting_set_string(IP, CLIENT_IP);
+                config_write_file(&conf, CLIENT_CONFIG_FILE);
+                break;
+
             case 'b':
                 CLIENT_PORT = atoi(optarg);
+                if (CLIENT_PORT == 0 || CLIENT_PORT > 65535) 
+                {
+                    CLIENT_PORT = use_random_port();
+                    printf("Invalid PORT value! Using a radomly choosen one ...\n");
+                }
+                config_setting_t *PORT = config_lookup(&conf, "CLIENT_PORT");
+                config_setting_set_int(PORT, CLIENT_PORT);
+                config_write_file(&conf, CLIENT_CONFIG_FILE);
                 break;
+
             case 'c':
                 CLIENT_LOG_DIR = strdup((const char*)optarg);
+                if (!strcmp(CLIENT_LOG_DIR, "")) break;
+                config_setting_t *LOGS = config_lookup(&conf, "CLIENT_LOG_DIR");
+                config_setting_set_string(LOGS, CLIENT_LOG_DIR);
+                config_write_file(&conf, CLIENT_CONFIG_FILE);
                 break;
+
             case 'd':
                 CLIENT_TORRENTS = strdup((const char*)optarg);
+                if (!strcmp(CLIENT_TORRENTS, "")) break;
+                config_setting_t *TORRENTS = config_lookup(&conf, "CLIENT_TORRENTS");
+                config_setting_set_string(TORRENTS, CLIENT_TORRENTS);
+                config_write_file(&conf, CLIENT_CONFIG_FILE);
                 break;
+
             case 'e':
                 CLIENT_DOWNLOAD = strdup((const char*)optarg);
+                if (!strcmp(CLIENT_DOWNLOAD, "")) {
+                    char cwd[FILENAME_MAX];
+                    if (!getcwd(cwd, sizeof(cwd))) {
+                        fprintf(stderr, "Could not get the current work directory :: %s\n", strerror(errno));
+                        return -1;
+                    }
+                }          
+                config_setting_t *DOWNLOAD = config_lookup(&conf, "CLIENT_DOWNLOAD");
+                config_setting_set_string(DOWNLOAD, CLIENT_DOWNLOAD);
+                config_write_file(&conf, CLIENT_CONFIG_FILE);
                 break;
+
             case 'h':
                 help(argv[0]);
+
             default:
                 break;
         }
     }
 
     struct Node *seeder = node_create(CLIENT_IP, CLIENT_PORT);    // our client seeder, but can be other seeder on the network
+
     struct Node *cserver = node_create(CSERVER_IP, CSERVER_PORT); // centrar server node
     char *json = NULL;
 
+    // if (!strcmp(argv[1], "_start_")) {
+    //     seeder_start(seeder);
+    //     err = 1; goto clean;
+    // }
 
     if (is_a_torrent(filename)) {
         if (jsonReadFile(filename, seeder, 0) < 0) {
@@ -351,9 +343,6 @@ int main(int argc, char **argv)
 
     int nodefd = connectton(cserver, json, strlen(json)+1);
     
-    if (seeder_start(seeder) == 1) {
-        err = 1; goto clean;
-    }
 
     char buf[512];
     if (recvfromn(nodefd, buf, 512)) {
@@ -364,7 +353,6 @@ int main(int argc, char **argv)
         err = -1; goto clean;
     }
 
-
     if (seeder->addr.sin_port == 0) {
         err = -1; goto clean;
     }
@@ -372,14 +360,14 @@ int main(int argc, char **argv)
     printf("IP: %s\nPORT: %d\n", inet_ntoa(seeder->addr.sin_addr), ntohs(seeder->addr.sin_port));
 
     close(nodefd);
-    
+
     nodefd = connectton(seeder, json, strlen(json)+1);
     char data[1024];
-    if (recvfromn(nodefd, data, sizeof(data))) {
+    if (recvfromn(nodefd, data, sizeof(data)) < 0) {
         err = -1; goto clean;
     }
-
     savefile(seeder->fileinfo->file_name, data, 1024);
+
 clean:
     close(nodefd);
     node_destroy(seeder);

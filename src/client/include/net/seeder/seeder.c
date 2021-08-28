@@ -156,7 +156,6 @@ int seeder_start(struct Node *seeder)
             break;
         default:
             _exit(EXIT_SUCCESS);
-            return -1;
     }
 
     if (setsid() < 0) {
@@ -171,8 +170,7 @@ int seeder_start(struct Node *seeder)
         case 0:
             break;
         default:
-            // _exit(EXIT_SUCCESS);
-            return 1;
+            _exit(EXIT_SUCCESS);
     }
 
     umask(0);
