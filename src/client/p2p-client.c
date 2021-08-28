@@ -156,14 +156,14 @@ static int savefile(const char *__restrict__ _filename, const char *_content, si
 }
 
 // Global configuration variables;
-const char *CLIENT_IP;
-unsigned CLIENT_PORT;
-const char *CLIENT_LOG_DIR;
-const char *CLIENT_TORRENTS;
-const char *CLIENT_DOWNLOAD;
+const char *CLIENT_IP = NULL;
+unsigned CLIENT_PORT = 0;
+const char *CLIENT_LOG_DIR = NULL;
+const char *CLIENT_TORRENTS = NULL;
+const char *CLIENT_DOWNLOAD = NULL;
 
-const char *CSERVER_IP;
-unsigned CSERVER_PORT;
+const char *CSERVER_IP = NULL;
+unsigned CSERVER_PORT = 0;
 
 static struct option long_options[] = {
     {"clientIP", required_argument, NULL, 'a'},
@@ -299,10 +299,10 @@ int main(int argc, char **argv)
     struct Node *cserver = node_create(CSERVER_IP, CSERVER_PORT); // centrar server node
     char *json = NULL;
 
-    // if (!strcmp(argv[1], "_start_")) {
-    //     seeder_start(seeder);
-    //     err = 1; goto clean;
-    // }
+    if (!strcmp(argv[1], "--start")) {
+        seeder_start(seeder);
+        err = 1; goto clean;
+    }
 
     if (is_a_torrent(filename)) {
         if (jsonReadFile(filename, seeder, 0) < 0) {
@@ -375,12 +375,12 @@ clean:
     free(json);
     config_destroy(&conf);
 
-    // free((char*)CLIENT_IP);
-    // free((char*)CLIENT_LOG_DIR);
-    // free((char*)CLIENT_TORRENTS);
-    // free((char*)CLIENT_DOWNLOAD);
+    free((char*)CLIENT_IP);
+    free((char*)CLIENT_LOG_DIR);
+    free((char*)CLIENT_TORRENTS);
+    free((char*)CLIENT_DOWNLOAD);
 
-    // free((char*)CSERVER_IP);
+    free((char*)CSERVER_IP);
 
     return err;
 }
