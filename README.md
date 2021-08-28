@@ -18,7 +18,7 @@ The project stills under development, so if something is missing or its bad, don
 - [X] Use the download folder
 - [X] Add a help sumary
 - [X] Add custom configuration through the command line
-- [ ] Do soem code refactoring (readability)
+- [ ] Do some code refactoring (readability)
 - [ ] Use protobuf instead of JSON?
 
 ## How it works?
