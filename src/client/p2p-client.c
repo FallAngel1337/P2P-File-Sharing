@@ -27,13 +27,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
+#include <getopt.h>
 #include <string.h>
 #include <libconfig.h>
 #include <unistd.h>
 #include <stdbool.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <time.h>
 #include <sys/stat.h>
 #include <limits.h>
 
@@ -164,13 +165,46 @@ const char *CLIENT_DOWNLOAD;
 const char *CSERVER_IP;
 unsigned CSERVER_PORT;
 
+static struct option long_options[] = {
+    {"clientIP", required_argument, NULL, 'a'},
+    {"clientPort", required_argument, NULL, 'b'},
+    {"clientLogDir", required_argument, NULL, 'c'},
+    {"clientTorrentDir", required_argument, NULL, 'd'},
+    {"clientDownload", required_argument, NULL, 'e'},
+    {"cserverIP", required_argument, NULL, 'f'},
+    {"cserverPort", required_argument, NULL, 'g'},
+    {"help", no_argument, NULL, 'h'},
+    {"default", no_argument, NULL, 'i'},
+    {0, 0, 0, 0},
+};
+
+static void __attribute__((noreturn)) help(char *__restrict__ __progname) 
+{
+    printf("Usage: %s <file> [options] ...\n", __progname);
+    printf("\nOPTIONS:\n");
+
+    printf("\t--clientIP\t\tSet the client IP on which other will connect to\n");
+    printf("\t--clientPort\t\tSet the client port on which other will connect to\n");
+    printf("\t--clientLogDir\t\tDefine on where the logs will be saved (recommend the defult)\n");
+    printf("\t--clientTorrentDir\tThe path where the links will be created (recommend the defult)\n");
+    printf("\t--clientDownload\tThe path where the downloads will be saved\n");
+    printf("\t--cserverIP\tDefine the IP address of the central server\n");
+    printf("\t--cservePort\tDefine the port of the central server\n");
+
+    printf("\nExample:\n");
+    printf("\t%s loveletter.txt\n", __progname);
+    printf("\t%s /home/john/loveletter.txt\n", __progname);
+
+    exit(EXIT_FAILURE);
+}
+
+
 int main(int argc, char **argv)
 {
     if (argc == 1) {
-        fprintf(stderr, "no arguments suplied\n");
-        return -1;
+        fprintf(stderr, "Too few arguments!\n");
+        help(argv[0]);
     }
-
     config_t conf;
 
     char *filename = argv[1];
@@ -221,6 +255,7 @@ int main(int argc, char **argv)
             config_write_file(&conf, CLIENT_CONFIG_FILE);
             printf("Successfully writed %s to %s\n", download, CLIENT_CONFIG_FILE);
             printf("Please run it again to apply the changes!\n");
+            config_destroy(&conf);
         } else {
             printf("Using current working directory as default!\n");
             
@@ -238,10 +273,54 @@ int main(int argc, char **argv)
             config_write_file(&conf, CLIENT_CONFIG_FILE);
             printf("Using default: %s\n", CLIENT_DOWNLOAD);
         }
+        config_destroy(&conf);
         return -1;
     }
+    
+    config_destroy(&conf);
 
-    struct Node *seeder = node_create(CLIENT_IP, CLIENT_PORT); // our client seeder, but can be other seeder on the network
+    int c = 1;
+    int index = 0;
+
+    while (c) 
+    {
+        c = getopt_long (argc, argv, "a:b:c:d:e:f:g:h", long_options, &index);
+
+        if (c == -1) break;
+
+        switch (c) {
+            case 0:
+                break;
+            case 'a':
+               CLIENT_IP = (const char*)optarg;
+               break;
+            case 'b':
+                CLIENT_PORT = atoi(optarg);
+                break;
+            case 'c':
+                CLIENT_LOG_DIR = (const char*)optarg;
+                break;
+            case 'd':
+                CLIENT_TORRENTS = (const char*)optarg;
+                break;
+            case 'e':
+                CLIENT_DOWNLOAD = (const char*)optarg;
+                break;
+            case 'f':
+                CSERVER_IP = (const char*)optarg;
+                break;
+            case 'g':
+                CSERVER_PORT = atoi(optarg);
+                break;
+            case 'h':
+                help(argv[0]);
+            default:
+                break;
+        }
+    }
+
+
+    struct Node *seeder = node_create(CLIENT_IP, CLIENT_PORT);    // our client seeder, but can be other seeder on the network
     struct Node *cserver = node_create(CSERVER_IP, CSERVER_PORT); // centrar server node
     char *json = NULL;
 
@@ -312,10 +391,8 @@ int main(int argc, char **argv)
     }
 
     savefile(seeder->fileinfo->file_name, data, 1024);
-
 clean:
     close(nodefd);
-    config_destroy(&conf);
     node_destroy(seeder);
     node_destroy(cserver);
     free(json);       
