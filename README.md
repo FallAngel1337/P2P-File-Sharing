@@ -22,6 +22,8 @@ The project stills under development, so if something is missing or its bad, don
 - [ ] Use protobuf instead of JSON?
 
 ## How it works?
+For now it just works locally at your own network.
+
 It's basically a BitTorrent-like network implementation. So you have those who have the file and provide it tho the other nodes (seeders) and the other who download the file and become seeders too. With a Centralized P2P architecture.
 
  
