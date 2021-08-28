@@ -15,8 +15,8 @@ The project stills under development, so if something is missing or its bad, don
 - [X] Create the listen client daemon to send the requested file
 - [ ] Make the seeder multi-client
 - [X] Use the download folder
-- [ ] Add a help sumary
-- [ ] Add custom configuration through the command line
+- [X] Add a help sumary
+- [X] Add custom configuration through the command line
 - [ ] Do soem code refactoring (readability)
 - [ ] Use protobuf instead of JSON?
 
