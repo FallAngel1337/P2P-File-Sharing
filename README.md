@@ -13,6 +13,7 @@ The project stills under development, so if something is missing or its bad, don
 
 ## Todo list
 - [X] Create the listen client daemon to send the requested file
+- [ ] Add IPC to control the daemon
 - [ ] Make the seeder multi-client
 - [X] Use the download folder
 - [X] Add a help sumary
@@ -83,7 +84,7 @@ For now, you need to build both separately.
     $ cd build
     $ cmake ..
     $ make
-    $ ./P2P-Client <file>
+    $ ./P2P --help
     ```
 
 - Building the server (not working)

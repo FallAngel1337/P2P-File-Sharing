@@ -171,10 +171,7 @@ static struct option long_options[] = {
     {"clientLogDir", required_argument, NULL, 'c'},
     {"clientTorrentDir", required_argument, NULL, 'd'},
     {"clientDownload", required_argument, NULL, 'e'},
-    {"cserverIP", required_argument, NULL, 'f'},
-    {"cserverPort", required_argument, NULL, 'g'},
     {"help", no_argument, NULL, 'h'},
-    {"default", no_argument, NULL, 'i'},
     {0, 0, 0, 0},
 };
 
@@ -183,13 +180,12 @@ static void __attribute__((noreturn)) help(char *__restrict__ __progname)
     printf("Usage: %s <file> [options] ...\n", __progname);
     printf("\nOPTIONS:\n");
 
+    printf("\t--start\t\tStart the daemon process (NOTE: run before anything)\n");
     printf("\t--clientIP\t\tSet the client IP on which other will connect to\n");
     printf("\t--clientPort\t\tSet the client port on which other will connect to\n");
     printf("\t--clientLogDir\t\tDefine on where the logs will be saved (recommend the defult)\n");
     printf("\t--clientTorrentDir\tThe path where the links will be created (recommend the defult)\n");
     printf("\t--clientDownload\tThe path where the downloads will be saved\n");
-    printf("\t--cserverIP\tDefine the IP address of the central server\n");
-    printf("\t--cservePort\tDefine the port of the central server\n");
 
     printf("\nExample:\n");
     printf("\t%s loveletter.txt\n", __progname);
@@ -278,14 +274,12 @@ int main(int argc, char **argv)
         }
     }
 
-    printf("Default Configuration:\nClient: %s:%d\nServer: %s:%d\n\n", CLIENT_IP, CLIENT_PORT, CSERVER_IP, CSERVER_PORT);
-
     int c = 1;
     int index = 0;
 
     while (c) 
     {
-        c = getopt_long(argc, argv, "a:b:c:d:e:f:g:h", long_options, &index);
+        c = getopt_long(argc, argv, "a:b:c:d:e:h", long_options, &index);
 
         if (c == -1) break;
 
@@ -307,20 +301,12 @@ int main(int argc, char **argv)
             case 'e':
                 CLIENT_DOWNLOAD = strdup((const char*)optarg);
                 break;
-            case 'f':
-                CSERVER_IP = strdup((const char*)optarg);
-                break;
-            case 'g':
-                CSERVER_PORT = atoi(optarg);
-                break;
             case 'h':
                 help(argv[0]);
             default:
                 break;
         }
     }
-
-    printf("Current Configuration:\nClient: %s:%d\nServer: %s:%d\n", CLIENT_IP, CLIENT_PORT, CSERVER_IP, CSERVER_PORT);
 
     struct Node *seeder = node_create(CLIENT_IP, CLIENT_PORT);    // our client seeder, but can be other seeder on the network
     struct Node *cserver = node_create(CSERVER_IP, CSERVER_PORT); // centrar server node
