@@ -295,39 +295,40 @@ int main(int argc, char **argv)
         }
     }
 
-    struct Node *seeder = node_create(CLIENT_IP, CLIENT_PORT);    // our client seeder, but can be other seeder on the network
+    struct Node *leecher = node_create(CLIENT_IP, CLIENT_PORT);
+    struct Node *seeder = NULL;
 
     struct Node *cserver = node_create(CSERVER_IP, CSERVER_PORT); // centrar server node
     char *json = NULL;
 
     if (is_a_torrent(filename)) {
-        if (jsonReadFile(filename, seeder, 0) < 0) {
+        if (jsonReadFile(filename, leecher, 0) < 0) {
             fprintf(stderr, "Could not load the json file_info content of the file %s\n", filename);
             err = -1; goto clean;
         }
 
-        if (!(json = nodeSerialize(seeder, SERR_NET))) {
+        if (!(json = nodeSerialize(leecher, SERR_NET))) {
             fprintf(stderr, "Could not load the json addr info content of the file %s\n", filename);
             err = -1; goto clean;
         }
     } else {
-        if (file_info_load(filename, seeder->fileinfo) < 0) {
+        if (file_info_load(filename, leecher->fileinfo) < 0) {
             fprintf(stderr, "Could not load the file %s\n", filename);
             err = -1; goto clean;
         }
 
-        if (create_symlink(filename, seeder->fileinfo->file_name) < 0) {
+        if (create_symlink(filename, leecher->fileinfo->file_name) < 0) {
             err = -1; goto clean;
         }
     
-        if (jsonWriteFile(&filename, seeder, 0) < 0) {
+        if (jsonWriteFile(&filename, leecher, 0) < 0) {
             fprintf(stderr, "Could not create the torrent\n");
             err = -1; goto clean;
         }
 
         printf("Created %s successfully!\n", filename);
 
-        if (!(json = nodeSerialize(seeder, SERR_NET))) {
+        if (!(json = nodeSerialize(leecher, SERR_NET))) {
             fprintf(stderr, "Was not possible to deserialize the node!\n");
             free(filename);
             err = -1; goto clean;
@@ -336,9 +337,7 @@ int main(int argc, char **argv)
         free(filename);
     }
 
-
     int nodefd = connectton(cserver, json, strlen(json)+1);
-    
 
     char buf[512];
     if (recvfromn(nodefd, buf, 512)) {
@@ -358,30 +357,32 @@ int main(int argc, char **argv)
     close(nodefd);
 
     nodefd = connectton(seeder, json, strlen(json)+1);
-    char data[1024];
-    if (recvfromn(nodefd, data, sizeof(data)) < 0) {
+    unsigned char *data = calloc(1, seeder->fileinfo->file_size+1);
+    
+    if (recvfromn(nodefd, data, seeder->fileinfo->file_size) < 0) {
         err = -1; goto clean;
     }
-    savefile(seeder->fileinfo->file_name, data, 1024);
 
-    if (!strcmp(argv[1], "--start")) {
-        seeder_start(seeder);
-        err = 1; goto clean;
-    }
+    savefile(seeder->fileinfo->file_name, data, seeder->fileinfo->file_size);
+
+    printf("Done 1!\n");
+    seeder_start(leecher);
+    printf("Done 2!\n");
+    free(data);
 
 clean:
-    close(nodefd);
+    config_destroy(&conf);
+    node_destroy(leecher);
     node_destroy(seeder);
     node_destroy(cserver);
-    free(json);
-    config_destroy(&conf);
 
+    free(json);
     free((char*)CLIENT_IP);
     free((char*)CLIENT_LOG_DIR);
     free((char*)CLIENT_TORRENTS);
     free((char*)CLIENT_DOWNLOAD);
-
     free((char*)CSERVER_IP);
 
+    close(nodefd);
     return err;
 }
