@@ -78,8 +78,10 @@ Then continue with
 $ make
 ```
 
+
 For now, you need to build both separately.
 -  Building the client
+[![asciicast](https://asciinema.org/a/IF9tTH25AdvmmxDpTukolTEVI.svg)](https://asciinema.org/a/IF9tTH25AdvmmxDpTukolTEVI)
     ```
     $ cd src/client/
     $ mkdir build
@@ -89,7 +91,8 @@ For now, you need to build both separately.
     $ ./P2P-Client --help
     ```
 
-- Building the server (not working)
+- Building the server
+[![asciicast](https://asciinema.org/a/vYSv1pZqbU5OFLr3LX1bYdNcB.svg)](https://asciinema.org/a/vYSv1pZqbU5OFLr3LX1bYdNcB)
     ```
     $ cd src/server/
     $ mkdir build
