@@ -22,24 +22,34 @@ static char* find_file(struct file_info *fileinfo)
 {
     DIR *d;
     struct dirent *dir;
+    struct stat sb;
 
     if (!(d = opendir(CLIENT_TORRENTS))) {
         LOG_ERROR("Could not open %s directory :: %s\n", CLIENT_TORRENTS, strerror(errno));
         return NULL;
     }
 
+    char *buf = calloc(1, PATH_MAX);
+    chdir(CLIENT_TORRENTS);
+
     while ((dir = readdir(d))) 
     {
-        if (strstr(dir->d_name, fileinfo->file_name)) break;
+        if (strstr(dir->d_name, fileinfo->file_name)) {
+            if (readlink(dir->d_name, buf, PATH_MAX) >= 0 
+            && strstr(buf, fileinfo->file_name)             
+            && stat(buf, &sb) >= 0                          
+            && sb.st_size == fileinfo->file_size) 
+            {
+                break;    
+            }
+            
+        } 
         dir = readdir(d);
     }
 
     rewinddir(d);
     closedir(d);
 
-    char *buf = calloc(1, PATH_MAX);
-    chdir(CLIENT_TORRENTS);
-    readlink(dir->d_name, buf, PATH_MAX);
     return buf;
 }
 

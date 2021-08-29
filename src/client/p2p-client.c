@@ -151,7 +151,11 @@ static int savefile(const char *__restrict__ _filename, const char *_content, si
     }
 
     printf("Saved the file at: %s\n", savefileto);
-    create_symlink(savefileto, _filename);
+    if (create_symlink(savefileto, _filename) < 0) {
+        fprintf(stderr, "Was not possible to create the symlink :: %s\n", strerror(errno));
+        free(savefileto);
+        return -1;
+    }
     free(savefileto);
     return 0;
 }
@@ -374,7 +378,7 @@ int main(int argc, char **argv)
     if (recvfromn(nodefd, data, seeder->fileinfo->file_size) < 0) {
         err = -1; goto clean;
     }
-
+    
     savefile(seeder->fileinfo->file_name, data, seeder->fileinfo->file_size);
     free(data);
 
