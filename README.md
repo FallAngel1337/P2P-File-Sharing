@@ -72,8 +72,8 @@ $ git clone https://githubcom/FallAngel1337/P2P-File-Sharing
 $ cd P2P-File-Sharing
 ```
 
-After that you can configure the client and server through the config files located at `conf` folder.
-Then continue with 
+After that you can configure the client and server through the config files located at `conf` folder or just using the program options.
+Then continue with
 ```
 $ make
 ```

@@ -186,7 +186,6 @@ static void __attribute__((noreturn)) help(char *__restrict__ __progname)
     printf("\t--clientLogDir\t\tDefine on where the logs will be saved (recommend the defult)\n");
     printf("\t--clientTorrentDir\tThe path where the links will be created (recommend the defult)\n");
     printf("\t--clientDownload\tThe path where the downloads will be saved\n");
-    printf("\t--default\t read from the config file\n");
 
     printf("\nExample:\n");
     printf("\t%s loveletter.txt\n", __progname);
@@ -246,11 +245,13 @@ int main(int argc, char **argv)
 
             case 'b':
                 CLIENT_PORT = atoi(optarg);
-                if (CLIENT_PORT == 0 || CLIENT_PORT > 65535) 
+
+                if (CLIENT_PORT <= 0 || CLIENT_PORT > 65535) 
                 {
                     CLIENT_PORT = use_random_port();
                     printf("Invalid PORT value! Using a radomly choosen one ...\n");
                 }
+
                 config_setting_t *PORT = config_lookup(&conf, "CLIENT_PORT");
                 config_setting_set_int(PORT, CLIENT_PORT);
                 config_write_file(&conf, CLIENT_CONFIG_FILE);
@@ -298,11 +299,6 @@ int main(int argc, char **argv)
 
     struct Node *cserver = node_create(CSERVER_IP, CSERVER_PORT); // centrar server node
     char *json = NULL;
-
-    if (!strcmp(argv[1], "--start")) {
-        seeder_start(seeder);
-        err = 1; goto clean;
-    }
 
     if (is_a_torrent(filename)) {
         if (jsonReadFile(filename, seeder, 0) < 0) {
@@ -367,6 +363,11 @@ int main(int argc, char **argv)
         err = -1; goto clean;
     }
     savefile(seeder->fileinfo->file_name, data, 1024);
+
+    if (!strcmp(argv[1], "--start")) {
+        seeder_start(seeder);
+        err = 1; goto clean;
+    }
 
 clean:
     close(nodefd);
