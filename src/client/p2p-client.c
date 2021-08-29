@@ -139,7 +139,7 @@ static int savefile(const char *__restrict__ _filename, const char *_content, si
     asprintf(&savefileto, "%s/%s", CLIENT_DOWNLOAD, _filename);
 
     if ((fd = open(savefileto, O_WRONLY|O_CREAT|O_TRUNC|O_EXCL, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH|S_IROTH)) < 0) {
-        fprintf(stderr, "Could not save the file to \"%s\" :: %s\n", _filename, strerror(errno));
+        fprintf(stderr, "Could not save the file to \"%s\" :: %s\n", savefileto, strerror(errno));
         free(savefileto);
         return -1;
     }
@@ -150,7 +150,8 @@ static int savefile(const char *__restrict__ _filename, const char *_content, si
         return -1;
     }
 
-    printf("Saved the file at: %s\n", _filename);
+    printf("Saved the file at: %s\n", savefileto);
+    create_symlink(savefileto, _filename);
     free(savefileto);
     return 0;
 }
@@ -301,6 +302,17 @@ int main(int argc, char **argv)
     struct Node *cserver = node_create(CSERVER_IP, CSERVER_PORT); // centrar server node
     char *json = NULL;
 
+    switch(fork()) {
+        case 0:            
+            seeder_start(leecher);
+            break;
+        case -1:
+            fprintf(stderr, "fork() failed :: %s\n", strerror(errno));
+            err = -1; goto clean;
+        default:
+            break;
+    }
+
     if (is_a_torrent(filename)) {
         if (jsonReadFile(filename, leecher, 0) < 0) {
             fprintf(stderr, "Could not load the json file_info content of the file %s\n", filename);
@@ -364,10 +376,6 @@ int main(int argc, char **argv)
     }
 
     savefile(seeder->fileinfo->file_name, data, seeder->fileinfo->file_size);
-
-    printf("Done 1!\n");
-    seeder_start(leecher);
-    printf("Done 2!\n");
     free(data);
 
 clean:
