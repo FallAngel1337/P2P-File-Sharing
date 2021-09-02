@@ -19,9 +19,7 @@
 
 #define A 0.1415F
 
-// uint64_t mulhashing(uint64_t _k, uint64_t _m);
-
-static uint64_t inline mulhashing(uint64_t _k, uint64_t _m)
+static inline uint64_t mulhashing(uint64_t _k, uint64_t _m)
 {
     return (uint64_t)(floor(fmod((_k*A), 1)*_m));
 }
