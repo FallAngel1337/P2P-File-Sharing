@@ -15,7 +15,6 @@
 
 #include <stdint.h>
 #include <math.h>
-#include <sys/ioctl.h>
 
 #define A 0.1415F
 
